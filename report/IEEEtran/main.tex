@@ -1,0 +1,276 @@
+\documentclass[journal]{IEEEtran} 
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords:}} #1}
+\usepackage{lipsum}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{blindtext}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage[utf8]{inputenc}
+\usepackage[english, activeacute]{babel}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{amsmath}
+\usepackage{mathrsfs}
+\usepackage{mathrsfs}
+\usepackage{amsbsy}
+\usepackage{caption}
+\captionsetup[figure]{name={Fig.}, labelsep=period}
+\usepackage{subcaption}
+\usepackage{hyperref} 
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+% \usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{mathtools}
+\usepackage{verbatim}
+\pagestyle{plain}
+\usepackage[switch]{lineno}
+\hyphenation{op-tical net-works semi-conduc-tor}
+% \linenumbers
+\usepackage{optidef}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\usepackage{amsthm}
+
+
+\begin{document}
+\title{Queue-Aware Meta-Reinforcement Learning for Multi-UAV Assisted Vehicular Edge Computing}
+
+\author{Auth1, Auth2, Nabajyoti Mazumdar,~\IEEEmembership{~Senior Member, IEEE} 
+\thanks{% Manuscript received January XX, 2021; revised May XX, 2020; January XX, 2020; accepted February XX, 2020. Date of publication February XX, 2020; date of current version July XX, 2020. The associate editor coordinating the review of this paper and approving it for publication was J. XXX Othman. 
+
+\emph{(Corresponding author: Nabajyoti Mazumdar.)}}
+
+\thanks{Auth1, Auth2, and N. Mazumdar are with the Department of Information Technology, Indian Institute of Information Technology, Allahabad. India. (e-mail: \texttt{mail1, mail2, nabajyoti@iiita.ac.in).}}
+% \thanks{Digital Object Identifier 10.1109/JIOT.2025.3021XXX}
+% \thanks{15XX-32XX © 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.}
+% \thanks{See https://www.ieee.org/publications/rights/index.html for more information.}
+}
+
+\markboth{IEEE Transactions on XXXXXXXXXX,~Vol.~X, No.~X, March~2026}%
+{Nandy \MakeLowercase{\textit{\textit{et al.}}}: Bare Demo of IEEEtran.cls for IEEE Journals}
+
+\maketitle
+
+\begin{abstract}
+Modern vehicular applications generate computation-intensive and latency-sensitive tasks. To handle dynamically changing vehicle mobility, uneven computing resources, growing task queues, and limited UAV energy, we propose an adaptive multi-UAV-assisted vehicular edge-cloud computing framework. Our approach integrates meta-reinforcement learning (R-MADDPG) with Lyapunov-based queue and energy management to jointly optimize task offloading, resource allocation, and 3-D UAV trajectory decisions.
+\end{abstract}
+
+
+
+\IEEEpeerreviewmaketitle
+\begin{IEEEkeywords}
+
+\end{IEEEkeywords}
+
+
+\section{Introduction}
+Modern vehicular applications generate computation-intensive and latency-sensitive tasks while vehicles continuously move through the network. Unmanned Aerial Vehicles (UAVs) equipped with edge servers can dynamically move toward high-demand areas and provide additional computing capacity. However, an effective system must simultaneously handle four coupled challenges: changing vehicle mobility and network conditions, limited and uneven computing resources, growing task queues, and limited UAV energy.
+
+Existing approaches separately address adaptive computation offloading and queue-aware UAV path planning. In this work, we integrate adaptive meta-reinforcement learning with Lyapunov-based queue and energy management to jointly optimize task offloading, resource allocation, and 3-D UAV trajectory decisions in a dynamic, energy-harvesting edge-cloud vehicular environment. The objective is to reduce task execution latency and energy consumption while keeping computational queues stable and UAVs operational over the long term.
+
+\subsection{Motivation and Contribution}
+Our main contributions are as follows:
+\begin{itemize}
+    \item \textbf{Joint Optimization Framework:} We formulate a joint optimization problem that considers 3-D UAV trajectories, task offloading, and resource allocation under dynamic vehicular environments.
+    \item \textbf{Long-term Stability:} We utilize Lyapunov optimization to decouple long-term queue stability and energy harvesting constraints into deterministic per-time-slot problems.
+    \item \textbf{Meta-Reinforcement Learning:} We apply R-MADDPG (Reptile-based Multi-Agent Deep Deterministic Policy Gradient) to rapidly adapt to dynamic conditions, ensuring low latency and energy consumption without the need for complete retraining.
+\end{itemize}
+
+The document is structured as follows. A review of relevant research is provided in \textit{Section} \ref{related_works}. The system model and problem formulation are comprehensively described in \textit{Section} \ref{system_model}. The proposed methodology is discussed in \textit{Section} \ref{proposed_methodology}. An experimental analysis is discussed in \textit{Section} \ref{res}. At last, the paper concludes with a concise summary of the results in \textit{Section} \ref{con}.
+
+\section{Related Works}
+\label{related_works}
+
+\subsection{sub1}
+
+\subsection{sub2}
+
+\subsection{sub3}
+
+
+
+\section{System Model and Problem Formulation}
+\label{system_model}
+This section first introduces the system model, and subsequently presents the formulation of the optimization problem.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Network Model}
+\label{subsec:network_model}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Model N}
+\label{subsec:N_model}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Problem Formulation}
+\label{subsec:problem_formulation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Proposed Methodology}
+\label{proposed_methodology}
+Our methodology integrates meta-reinforcement learning (R-MADDPG) with Lyapunov optimization to manage the dynamic vehicular environment.
+
+\subsection{Lyapunov Queue and Energy Management}
+To ensure long-term stability without suffering from indefinite task accumulation or complete battery depletion, we employ Lyapunov optimization. We define virtual queues for UAV energy deficits and physical queues for task backlogs. By minimizing a drift-plus-penalty function at each time slot, the system balances immediate performance optimization (latency and energy cost) with long-term queue stability and energy sustainability.
+
+\subsection{Meta-MADDPG Decision Engine}
+We use Multi-Agent Deep Deterministic Policy Gradient (MADDPG) to determine optimal offloading, resource allocation, and 3-D UAV movement. To overcome the limitations of standard DRL in rapidly changing vehicular environments, we embed MADDPG within a Reptile Meta-Learning framework. The outer meta-learning module learns robust initial weights across diverse environmental distributions. When encountering a new scenario (e.g., altered traffic density or energy arrival rates), the inner module rapidly adapts the policy with minimal gradient steps.
+
+\subsection{System Workflow}
+The workflow is summarized as follows:
+\begin{enumerate}
+    \item \textbf{Observation:} The system monitors vehicle mobility, task arrivals, UAV states (position, energy), and queue lengths.
+    \item \textbf{Decision Making:} The Meta-MADDPG agents select tasks to offload, compute resource allocation, and plan 3-D UAV trajectories.
+    \item \textbf{Constraint Satisfaction:} Decisions are bounded by the Lyapunov penalty, ensuring overloaded queues redirect tasks to alternative nodes (RSU or Cloud) and low-energy UAVs conserve propulsion energy.
+\end{enumerate}
+
+\section{Numerical Results}
+\label{results}
+
+\subsection{Benchmark Comparisons}
+\begin{itemize}
+    \item \textit{algo1} \cite{}: descr1.
+    \item \textit{algo2} \cite{}: descr2.
+    \item \textit{algo3} \cite{}: descr3.
+    \item \textit{algo4} \cite{}: descr4.
+    \item \textit{algo5} \cite{}: descr5.
+    \item \textit{algo6} \cite{}: descr6.
+\end{itemize}
+
+
+
+
+\section{Conclusion}
+\label{conclusion}
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref.bib}
+
+\end{document}
+
