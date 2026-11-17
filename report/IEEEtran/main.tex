@@ -1,276 +1,1557 @@
-\documentclass[journal]{IEEEtran} 
+\documentclass[journal]{IEEEtran}
 \providecommand{\keywords}[1]{\textbf{\textit{Keywords:}} #1}
-\usepackage{lipsum}
 \usepackage{multicol}
 \usepackage{multirow}
-\usepackage{blindtext}
 \usepackage{graphicx}
-\usepackage{pdfpages}
 \usepackage[utf8]{inputenc}
-\usepackage[english, activeacute]{babel}
+\usepackage[english]{babel}
 \usepackage{float}
-\usepackage{listings}
 \usepackage{amssymb}
-\usepackage{pifont}
 \usepackage{amsmath}
+\usepackage{amsthm}
 \usepackage{mathrsfs}
-\usepackage{mathrsfs}
-\usepackage{amsbsy}
 \usepackage{caption}
 \captionsetup[figure]{name={Fig.}, labelsep=period}
 \usepackage{subcaption}
-\usepackage{hyperref} 
+\usepackage[hidelinks]{hyperref}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
-% \usepackage{algorithm}
-\usepackage{algorithmic}
 \usepackage{array}
 \usepackage[table]{xcolor}
 \usepackage{colortbl}
 \usepackage{mathtools}
-\usepackage{verbatim}
-\pagestyle{plain}
-\usepackage[switch]{lineno}
-\hyphenation{op-tical net-works semi-conduc-tor}
-% \linenumbers
-\usepackage{optidef}
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\usepackage{amsthm}
+% optidef removed -- mini! environments overflow IEEE two-column
+\newtheorem{remark}{Remark}
 
+\pagestyle{plain}
+\hyphenation{op-tical net-works semi-conduc-tor}
 
 \begin{document}
+
 \title{Queue-Aware Meta-Reinforcement Learning for Multi-UAV Assisted Vehicular Edge Computing}
 
-\author{Auth1, Auth2, Nabajyoti Mazumdar,~\IEEEmembership{~Senior Member, IEEE} 
-\thanks{% Manuscript received January XX, 2021; revised May XX, 2020; January XX, 2020; accepted February XX, 2020. Date of publication February XX, 2020; date of current version July XX, 2020. The associate editor coordinating the review of this paper and approving it for publication was J. XXX Othman. 
-
-\emph{(Corresponding author: Nabajyoti Mazumdar.)}}
-
-\thanks{Auth1, Auth2, and N. Mazumdar are with the Department of Information Technology, Indian Institute of Information Technology, Allahabad. India. (e-mail: \texttt{mail1, mail2, nabajyoti@iiita.ac.in).}}
-% \thanks{Digital Object Identifier 10.1109/JIOT.2025.3021XXX}
-% \thanks{15XX-32XX © 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.}
-% \thanks{See https://www.ieee.org/publications/rights/index.html for more information.}
+\author{
+\begin{tabular}[t]{c}Arpit Anand\\IIT2023170\end{tabular} \quad
+\begin{tabular}[t]{c}Hridayesh\\IIT2023148\end{tabular} \quad
+\begin{tabular}[t]{c}KInshuk\\IIT2023079\end{tabular} \quad
+\begin{tabular}[t]{c}Rahul Garg\\IIT2023173\end{tabular} \quad
+\begin{tabular}[t]{c}Anurag Sikarwar\\IIT2023242\end{tabular}
 }
 
-\markboth{IEEE Transactions on XXXXXXXXXX,~Vol.~X, No.~X, March~2026}%
-{Nandy \MakeLowercase{\textit{\textit{et al.}}}: Bare Demo of IEEEtran.cls for IEEE Journals}
+
 
 \maketitle
 
 \begin{abstract}
-Modern vehicular applications generate computation-intensive and latency-sensitive tasks. To handle dynamically changing vehicle mobility, uneven computing resources, growing task queues, and limited UAV energy, we propose an adaptive multi-UAV-assisted vehicular edge-cloud computing framework. Our approach integrates meta-reinforcement learning (R-MADDPG) with Lyapunov-based queue and energy management to jointly optimize task offloading, resource allocation, and 3-D UAV trajectory decisions.
+A vehicular edge-cloud network must serve moving users despite fluctuating demand, unequal processing resources, and limited UAV energy. This report develops a queue-aware meta-reinforcement learning approach for coordinating several UAVs with vehicles, roadside servers, and a cloud. Control decisions cover execution destinations, UAV/cloud workload partitioning, CPU allocation, and three-dimensional flight. Work remains in transmission and computation queues until service is completed, allowing transport and waiting time to enter the model explicitly. Battery constraints govern what can be executed immediately, while virtual energy queues track the long-term expenditure target. A Lyapunov drift bound connects these backlogs to the control objective. The proposed hybrid extension of Reptile-based multi-agent deep deterministic policy gradient learns slot-level decisions and an initialization intended for adaptation with limited interactions. Before execution, a feasibility controller checks resource use, energy, and flight safety. The report specifies the conditions needed for stability analysis; experimental validation of the learned controller and its adaptation performance remains future work.
 \end{abstract}
 
-
-
-\IEEEpeerreviewmaketitle
 \begin{IEEEkeywords}
-
+Vehicular edge computing, UAV trajectory control, task queues, Lyapunov optimization, meta-reinforcement learning, hybrid multi-agent control.
 \end{IEEEkeywords}
 
+\IEEEpeerreviewmaketitle
 
 \section{Introduction}
-Modern vehicular applications generate computation-intensive and latency-sensitive tasks while vehicles continuously move through the network. Unmanned Aerial Vehicles (UAVs) equipped with edge servers can dynamically move toward high-demand areas and provide additional computing capacity. However, an effective system must simultaneously handle four coupled challenges: changing vehicle mobility and network conditions, limited and uneven computing resources, growing task queues, and limited UAV energy.
+Localization, object detection, and cooperative perception place substantial processing demands on connected vehicles while allowing little response delay. UAV-assisted mobile edge computing (MEC) can supplement roadside infrastructure by placing servers near changing concentrations of users. Prior work has examined stochastic task offloading with trajectory scheduling~\cite{zhang2019mobile}, as well as cooperative computation, CPU control, and UAV-enabled wireless power transfer~\cite{liu2020uav}. In vehicular networks, an aerial server operates alongside fixed roadside units (RSUs), and its usefulness depends on link quality, queued work, flight requirements, and remaining battery energy. Proximity alone is therefore an incomplete basis for offloading: waiting at a nearby congested UAV may exceed the delay of using a more distant server.
 
-Existing approaches separately address adaptive computation offloading and queue-aware UAV path planning. In this work, we integrate adaptive meta-reinforcement learning with Lyapunov-based queue and energy management to jointly optimize task offloading, resource allocation, and 3-D UAV trajectory decisions in a dynamic, energy-harvesting edge-cloud vehicular environment. The objective is to reduce task execution latency and energy consumption while keeping computational queues stable and UAVs operational over the long term.
+The difficulty arises from four interacting sources. Moving vehicles alter their available links, unequal server capacities distribute work unevenly, random arrivals accumulate waiting tasks, and UAV flight shares a limited energy supply with communication and computation. DRL offers policies learned through interaction~\cite{lowe2017multi,schulman2017proximal}; meta-learning seeks initial parameters that support adaptation from limited data~\cite{finn2017model,nichol2018reptile}; and Lyapunov optimization links online decisions to long-term backlog and resource conditions~\cite{neely2010stochastic,mao2017dynamic}. Combining these tools requires a common account of task progress and a mechanism for enforcing physical constraints.
 
-\subsection{Motivation and Contribution}
-Our main contributions are as follows:
+Two studies provide the main starting points. Yan et al.\ \cite{yan2026rmaddpg} use Reptile with multi-agent deep deterministic policy gradient (MADDPG) to allocate computation and offload work in a UAV/RSU/cloud architecture. Sun et al.\ \cite{sun2026qtop} formulate vehicular offloading and three-dimensional UAV path planning using queue-aware Lyapunov optimization, with a genetic algorithm for the resulting decisions. Together, these approaches suggest a controller that adapts to operating conditions while considering transmission backlogs, congestion at the receiving server, and the energy consequences of service and flight.
+
+The proposed queue-aware R-MADDPG assigns routing decisions to vehicles, processing allocations to edge servers, and flight decisions to UAVs. Uploaded partitionable work may be divided between execution at the receiving UAV and forwarding to a cloud with finite capacity. The model retains unfinished work across slot boundaries, including incomplete uploads and tasks whose deadlines have expired. Queue and long-term energy terms guide learning, and a feasibility controller checks the battery and motion requirements of each proposed action.
+
+\subsection{Motivation and Contributions}
+The design has four principal elements:
 \begin{itemize}
-    \item \textbf{Joint Optimization Framework:} We formulate a joint optimization problem that considers 3-D UAV trajectories, task offloading, and resource allocation under dynamic vehicular environments.
-    \item \textbf{Long-term Stability:} We utilize Lyapunov optimization to decouple long-term queue stability and energy harvesting constraints into deterministic per-time-slot problems.
-    \item \textbf{Meta-Reinforcement Learning:} We apply R-MADDPG (Reptile-based Multi-Agent Deep Deterministic Policy Gradient) to rapidly adapt to dynamic conditions, ensuring low latency and energy consumption without the need for complete retraining.
+\item An end-to-end vehicular edge-cloud model that tracks task identities and completion times, conserves routed workload, and represents finite transmission, backhaul, and processing resources through persistent queues.
+\item A normalized Lyapunov formulation that combines physical backlogs with virtual net-energy queues and retains explicit battery and flight constraints for every slot.
+\item A hybrid MADDPG architecture with role-specific actors for categorical dispatch and continuous resource and motion decisions, trained through Reptile to obtain actor and critic initializations across operating distributions.
+\item An execution and adaptation procedure that records both proposed and feasible actions while carrying the actual workloads and battery states through online parameter updates.
 \end{itemize}
+These elements define the proposed methodology. Their inclusion alone establishes neither optimality nor stability of the learned policy, and any adaptation benefit requires evaluation.
 
-The document is structured as follows. A review of relevant research is provided in \textit{Section} \ref{related_works}. The system model and problem formulation are comprehensively described in \textit{Section} \ref{system_model}. The proposed methodology is discussed in \textit{Section} \ref{proposed_methodology}. An experimental analysis is discussed in \textit{Section} \ref{res}. At last, the paper concludes with a concise summary of the results in \textit{Section} \ref{con}.
+The literature discussion in Section~\ref{related_works} covers UAV-assisted MEC, vehicular DRL, meta-learning, and queue-aware control. The physical network, mobility, task, channel, computation, queue, flight, and energy models appear in Section~\ref{system_model}; Section~\ref{problem_formulation} then states the stochastic optimization problem. The controller design follows in Section~\ref{proposed_methodology}. Section~\ref{results} states the evaluation protocol and distinguishes completed engineering evidence from the research-scale experiments that remain pending; Section~\ref{conclusion} summarizes the present scope.
 
+\iffalse
 \section{Related Works}
 \label{related_works}
+\subsection{UAV-Assisted MEC and Task Offloading}
+Offloading to an aerial server makes task service dependent on both communication resources and aircraft motion. Zhang et al.\ \cite{zhang2019mobile} address stochastic offloading and trajectory scheduling through Lyapunov queue analysis, decomposing an energy objective into tractable subproblems. In the system studied by Liu et al.\ \cite{liu2020uav}, a UAV supplies computation and wireless power to sensor devices; offloading, CPU operation, and trajectory are optimized jointly. Both studies show why service allocation and movement must be coordinated. Their device populations and service paths, however, differ from the vehicle/RSU/UAV/cloud setting of this report.
 
-\subsection{sub1}
+Positioning an aerial node according to anticipated demand is another related direction. Zhang et al.\ \cite{zhang2020uav} predict cellular demand with machine learning to support on-demand aerial base-station deployment and its communication and mobility energy decisions. This work informs demand-responsive positioning, although its formulation concerns wireless deployment rather than multi-UAV MEC task execution. Here, positioning is considered together with processing delays, transmission queues, and limited edge and cloud capacity.
 
-\subsection{sub2}
+\subsection{Deep Reinforcement Learning for VEC}
+Interaction-based DRL allows a resource policy to be learned without solving a new explicit optimization model for every decision. Ye et al.\ \cite{ye2021deep} apply decentralized DRL to resource allocation in V2V communications. Their results concern vehicular radio management; extending that idea to UAV motion or MADDPG-based control requires a separate formulation.
 
-\subsection{sub3}
+Centralized training in MADDPG~\cite{lowe2017multi} gives actor-critic learning access to information about interacting agents. PPO~\cite{schulman2017proximal} instead controls policy updates through a surrogate optimization objective. Selecting either method does not, by itself, guarantee stable task queues, physically admissible battery use, or adaptation to an unfamiliar operating distribution. In this problem, destinations are categorical, whereas CPU allocations and motion are continuous. That combination calls for a hybrid action representation, supported by a feasibility layer outside the learned policy.
 
+\subsection{Meta-Reinforcement Learning}
+MAML~\cite{finn2017model} trains parameters so that a small number of gradient steps can adapt them to a new task. Reptile~\cite{nichol2018reptile} uses first-order updates: it trains on sampled tasks and shifts the common initialization toward the resulting task-specific weights. Such initializations may help a controller respond to changes in traffic, workload, or energy supply, but suitability for the proposed VEC system must be demonstrated. The survey by Park et al.\ \cite{park2019meta} discusses learning at the wireless edge and the associated communication and computation demands, offering context for this design rather than a dedicated meta-RL offloading solution.
 
+Yan et al.\ \cite{yan2026rmaddpg} provide the closest meta-learning foundation, combining Reptile and MADDPG with local, RSU, and UAV processing and UAV-to-cloud forwarding. Their agents are UAVs and an RSU, whose decisions allocate execution fractions and CPU resources under a weighted latency--energy cost. UAV positions enter the observations, while the stated action vector does not control flight. The framework developed here introduces vehicle-owned dispatch, retains transport and computation backlogs, and includes learned motion subject to physical energy limits.
+
+\subsection{Lyapunov Optimization for Queue Stability}
+Under suitable feasibility and moment conditions, Lyapunov optimization~\cite{neely2010stochastic} replaces a long-term stochastic objective with slot-level decisions weighted by current queues. Decisions thus respond to the operating state. Mao et al.\ \cite{mao2017dynamic} use this approach for offloading from energy-harvesting mobile devices, showing how computation and energy availability must be accounted for together.
+
+Q-TOP~\cite{sun2026qtop} applies queue-aware control to multi-UAV vehicular computing with three-dimensional flight, FIFO service, propulsion and computation expenditure, uncertain harvesting, and a long-term energy budget. A Lyapunov transformation produces per-slot problems handled by a genetic algorithm. Its displayed Lyapunov function tracks computation queues at vehicles, RSUs, and UAVs. The present formulation also tracks transmission stages and a virtual energy deficit, and adopts weighted processor sharing for learned CPU allocation.
+
+The research question is whether adaptive multi-agent learning can control this queue-aware vehicular edge-cloud network effectively. The formulation checks immediate battery feasibility independently of the drift objective. Stability results obtained for an ideal Lyapunov optimizer require further conditions before they can be applied to a learned approximation. The literature supports the design choices, while claims of novelty or comparative advantage require additional evidence.
 
 \section{System Model and Problem Formulation}
 \label{system_model}
-This section first introduces the system model, and subsequently presents the formulation of the optimization problem.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\subsection{Network Model}
+\subsection{Network and Time Model}
 \label{subsec:network_model}
+The node sets are $\mathcal V$ for vehicles, $\mathcal R$ for fixed RSUs, and $\mathcal U$ for UAVs; $c$ identifies the cloud. Each slot lasts $\Delta>0$ seconds. At the start of slot $t$, the controller observes the state and serves only work already eligible at that boundary. New external work and completed transfers enter their receiving stages at the following boundary. Link rates are approximated as constant within a slot, and flight safety is checked along the complete motion segment.
 
+Vehicle motion is restricted to the road network. Edge processing is available at RSUs and UAVs, while the cloud has a configured finite CPU capacity and is reached through finite-capacity UAV backhaul links. The initial architecture supports neither direct vehicle-to-cloud access nor RSU-to-cloud forwarding, inter-UAV migration, or destination reassignment after dispatch. Transmit powers are fixed and the core radio allocation is orthogonal. Caching, NOMA, jammers, and diffusion actors are excluded from this formulation.
 
+\subsection{Task Routing and Partitioning}
+\label{subsec:task_model}
+For task $i$ originating at vehicle $v(i)$, the record $\ell_i=(b_i,c_i,a_i,d_i)$ specifies its input, work, arrival, and deadline allowance. Its computation intensity is $\chi_i=c_i/b_i$. The input contains $b_i>0$ bits, execution requires $c_i>0$ CPU cycles, and $a_i$ gives the arrival timestamp in seconds. The allowance $d_i$ measures permitted response time, and $\chi_i$ measures cycles per bit. Throughout the model, $a_i$ refers to time. A task waits in its vehicle's ingress buffer until dispatched.
 
+A dispatch decision uses binary indicators $x_i^L$, $x_{ir}^R$, and $x_{ik}^U$ to identify exactly one execution destination:
+\begin{equation}
+x_i^L+\sum_{r\in\mathcal R}x_{ir}^R
+       +\sum_{k\in\mathcal U}x_{ik}^U=1.
+\label{eq:destination}
+\end{equation}
+Holding a task in ingress is permitted; the equality in Eq.~\eqref{eq:destination} becomes applicable upon dispatch. Once chosen, the destination is retained. A UAV-bound task sends its entire input to that UAV. The UAV processes fraction $\rho_i\in[0,1]$, with the remaining input and work assigned to cloud forwarding:
+\begin{equation}
+\begin{aligned}
+c_i^{U}&=\rho_i c_i,& c_i^{c}&=(1-\rho_i)c_i,\\
+b_i^{\mathrm{bh}}&=(1-\rho_i)b_i.
+\end{aligned}
+\label{eq:split}
+\end{equation}
+The split applies to workloads explicitly declared partitionable. An indivisible task has $\rho_i=1$, and every task retains the fraction chosen at dispatch. Independently executable partitions are represented by bounded chunks, each becoming ready only after its required input has arrived. Completion requires every nonempty execution branch and the merge time $\tau_i^{\mathrm{merge}}$. Configuration limits bound input size, cycle demand, and computation intensity, with input size also bounded below by a positive value. Dispatches and staging releases have finite per-slot workload budgets so that internal transfers have bounded increments. Releases exceeding the current budget wait in staging.
 
+Using the recorded completion time $f_i^{\mathrm{done}}$, task latency and the deadline-success indicator are calculated as
+\begin{equation}
+T_i=f_i^{\mathrm{done}}-a_i,\qquad
+\delta_i=\mathbf 1\{T_i\le d_i\}.
+\label{eq:actual_latency}
+\end{equation}
+Elapsed time includes ingress waiting, transmission, queueing, processing, and merging. A split task waits for its last branch before completion. Returned results are assumed small enough to neglect; substantial return traffic would need an additional link queue. A deadline crossing produces one miss event. Processing continues after that event, preserving the unfinished workload in the accounting.
 
+\subsection{Communication Model}
+For vehicle-to-UAV communication, mean large-scale gain depends on distance and elevation and includes probabilistic LoS/NLoS attenuation. LoS probability uses the environment-dependent sigmoid in \cite{yan2026rmaddpg}, with an additional loss for NLoS propagation. A positive lower bound on distance avoids singular gains. Vehicle-to-RSU propagation follows a configured terrestrial path-loss/fading model. UAV backhaul is described by an effective gain parameter, without assigning an artificial altitude to the cloud.
 
+The rate of link $h$, allocated bandwidth $W_h$ and transmit power $P_h$ with gain $g_h$, is
+\begin{equation}
+R_h=W_h\log_2\!\left(1+\frac{P_hg_h}{N_0W_h+I_h}\right),
+\label{eq:rate}
+\end{equation}
+The zero-bandwidth case is defined by $R_h=0$ when $W_h=0$. Noise power is determined by the spectral density $N_0$, and orthogonal operation gives $I_h=0$. A fixed spectrum partition prevents interfering cells from allocating the same resource twice. At node $n$, the allocation obeys $\sum_{h\in\mathcal H_n}W_h\le W_n^{\max}$. All compared controllers use the same deterministic queue-aware bandwidth scheduler, which serves eligible links and resolves equal priorities by task ID.
 
+A transfer of $s_{ih}^{\mathrm{tr}}$ equivalent CPU cycles for task $i$ over link $h$ must satisfy the bit-budget condition
+\begin{equation}
+\sum_i\frac{s_{ih}^{\mathrm{tr}}}{\chi_i}\le\Delta R_h.
+\label{eq:radio_capacity}
+\end{equation}
+Transmission is enabled only while coverage and node availability permit it. If contact is lost during an upload, the outstanding input remains buffered for the previously chosen destination.
 
+\subsection{Computing Service and Persistent Queues}
+The queue collection $\mathcal J$ covers ingress, upload, receive/staging, local processing, RSU processing, UAV processing, backhaul, and cloud processing. Transmission records store bits and processing records store cycles. The drift calculation places them on a common workload scale $Q_j$ measured in equivalent CPU cycles: $b$ untransmitted bits from task $i$ represent $\chi_i b$ cycles. A partially received chunk stays in staging until ready for execution and remains part of the total accounted workload.
 
+With realized departures $S_j$ and arrivals $A_j$, queue evolution follows
+\begin{equation}
+Q_j(t+1)=Q_j(t)-S_j(t)+A_j(t),\quad
+0\le S_j(t)\le Q_j(t).
+\label{eq:queue}
+\end{equation}
+A queue receives both newly generated work and transfers from upstream stages. Each internal transfer removes and adds equal equivalent workload at its two endpoints; UAV routing divides that workload as specified in Eq.~\eqref{eq:split}. Execution is the operation that removes processing work from a branch. Work entering at a boundary cannot receive downstream service in the slot that has just ended.
 
+At processing node $n$, active CPU frequency is $f_n(t)$, nonnegative task shares are $w_{in}(t)$, and delivered service is $s_{in}^{\mathrm{cpu}}$ cycles. Weighted processor sharing imposes
+\begin{equation}
+\begin{aligned}
+&0\le f_n\le f_n^{\max},\qquad \sum_i w_{in}\le1,\\
+&0\le s_{in}^{\mathrm{cpu}}\le
+ \min\{c_{in}^{\mathrm{eligible}},\Delta f_nw_{in}\}.
+\end{aligned}
+\label{eq:cpu_capacity}
+\end{equation}
+Ready residual work is denoted by $c_{in}^{\mathrm{eligible}}$. The initial configuration fixes local CPU frequencies and cloud scheduling, while learning the RSU/UAV frequencies and task shares. Service therefore follows weighted processor sharing rather than FIFO. For each server, dynamic processing energy is accounted for once as $E_n^{\mathrm{cpu}}=\kappa_n f_n^2\sum_i s_{in}^{\mathrm{cpu}}$. This equals the integral of $\kappa_n f_n^3$ over the CPU's active time. Any modeled idle electronics expenditure is added separately.
 
+Physical workloads are intended to satisfy strong stability:
+\begin{equation}
+\limsup_{T\to\infty}\frac1T\sum_{t=0}^{T-1}
+ \mathbb E[Q_j(t)]<\infty,\quad j\in\mathcal J.
+\label{eq:stability}
+\end{equation}
+This condition is meaningful when arrival loads can be stabilized within the available communication, CPU, and energy resources. Under persistent overload, the model exposes increasing backlogs and does not discard arrivals to conceal congestion.
 
+\subsection{Three-Dimensional UAV Motion}
+UAV position is $\boldsymbol p_k$. A motion command contains speed $v_k$, azimuth $\theta_k$, and elevation $\phi_k$, yielding $\boldsymbol u_k=v_k[\cos\theta_k\cos\phi_k,\sin\theta_k\cos\phi_k,\sin\phi_k]^{\mathsf T}$. Slot motion updates position through $\boldsymbol p_k(t+1)=\boldsymbol p_k(t)+\Delta\boldsymbol u_k(t)$. Admissible commands respect maximum speed, climb and descent limits, altitude and map boundaries, and $\|\boldsymbol u_k(t)-\boldsymbol u_k(t-1)\|\le a_k^{\max}\Delta$ for acceleration.
+Every pair of airborne UAVs must maintain separation throughout the slot:
+\begin{equation}
+\min_{\tau\in[0,\Delta]}
+\|\boldsymbol p_k(t)+\tau\boldsymbol u_k(t)
+ -\boldsymbol p_l(t)-\tau\boldsymbol u_l(t)\|
+\ge d_{\mathrm{safe}}.
+\label{eq:collision}
+\end{equation}
+The minimum separation may occur between the endpoints. Given relative position $\boldsymbol r$ and relative velocity $\boldsymbol v$, closest approach occurs at $[-\boldsymbol r^{\mathsf T}\boldsymbol v/\|\boldsymbol v\|^2]_0^\Delta$. For zero relative velocity, use $\tau=0$. Here $[x]_0^\Delta$ restricts $x$ to the indicated interval.
 
+\subsection{Energy Consumption, Harvesting, and Battery Feasibility}
+Horizontal flight power follows the rotary-wing model used in Q-TOP~\cite{sun2026qtop}, with profile, induced, and parasitic contributions. A calibrated nonnegative vertical correction adds separate ascent and descent coefficients and a quadratic vertical-speed contribution. Its stated range is bounded climb/descent operation; it is an approximation rather than a full aerodynamic description. Integrating the resulting power over $\Delta$ gives airborne propulsion energy. Landed UAVs incur no airborne propulsion expenditure. Simulation settings must supply the calibration parameters and the range in which they are valid.
 
+Total expenditure from the UAV battery is expressed as
+\begin{equation}
+E_k=E_k^{\mathrm{prop}}+E_k^{\mathrm{cpu}}
+ +E_k^{\mathrm{rx}}+E_k^{\mathrm{bh}}+E_k^{\mathrm{ctrl}},
+\label{eq:uav_energy}
+\end{equation}
+including reception, backhaul transmission, and control-electronics expenditure alongside flight and processing. Vehicle uplink transmission is charged to the vehicle. The system total $E^{\mathrm{sys}}$ includes the declared vehicle, RSU, UAV, and cloud expenditures, with no component counted twice.
 
+Energy replenishment $H_k(t)$ becomes available at the end of the slot. The first scenario uses a bounded uniform harvest model, with correlated supply and outages considered in subsequent scenarios. Decisions can use the distribution statistics but have no access to the forthcoming realized sample. The battery then evolves according to
+\begin{equation}
+B_k(t+1)=\min\{B_k^{\max},B_k(t)-E_k(t)+H_k(t)\}.
+\label{eq:battery}
+\end{equation}
+Available energy limits every command to $0\le E_k(t)\le B_k(t)$. Continuing normal service also imposes
+\begin{equation}
+B_k(t)-E_k(t)\ge
+ B_k^{\mathrm{res}}(\boldsymbol p_k(t+1),\boldsymbol u_k(t)),
+\label{eq:reserve}
+\end{equation}
+The reserve upper-bounds the energy needed for a verified return or landing trajectory without additional harvesting. That contingency may consume reserved energy while still respecting the battery and flight limits. Returning or inactive UAVs are masked as new task destinations. The initial state must support safe operation and an admissible contingency; hovering consumes energy and cannot serve as a free fallback. Laser harvesting provides a motivation for replenishment, but deployment claims would require a geometric and energy-transfer model.
 
-
-\subsection{Model N}
-\label{subsec:N_model}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\subsection{Problem Formulation}
+\subsection{Long-Term Optimization Problem}
 \label{subsec:problem_formulation}
+The unfinished-task count $N(t)$ includes tasks waiting in ingress or transport and tasks whose finished branches still await siblings. Let $M(t)$ count first deadline crossings during the slot. The instantaneous cost is
+\begin{equation}
+C(t)=w_L\frac{\Delta N(t)}{L_{\mathrm{ref}}}
+ +w_E\frac{E^{\mathrm{sys}}(t)}{E_{\mathrm{ref}}}+w_DM(t).
+\label{eq:cost}
+\end{equation}
+Reference scales are positive and fixed by the training configuration, and all weights are nonnegative. Occupancy supplies a dense measure of delay: summed over a trace that fully drains, it yields aggregate task sojourn time quantized to slots. Little's law connects this measure to mean response time for stable stationary operation at a fixed arrival rate. Measured latency still uses Eq.~\eqref{eq:actual_latency}. Deadlines contribute miss penalties; the formulation does not assume every deadline can be met.
 
+Collecting dispatch, routing, partitioning, CPU, and motion decisions in $\boldsymbol\alpha(t)$ gives the long-term objective
+\begin{equation}
+\begin{aligned}
+\mathcal P:\quad \min_{\pi}\;&\limsup_{T\to\infty}\frac1T
+ \sum_{t=0}^{T-1}\mathbb E_\pi[C(t)]\\
+\mathrm{s.t.}\;&\boldsymbol\alpha(t)\in\mathcal F(s_t),
+ \quad\text{Eq.~\eqref{eq:stability}},\\
+&\limsup_{T\to\infty}\frac1T\sum_{t=0}^{T-1}
+ \mathbb E_\pi[E_k(t)-H_k(t)]\le\bar e_k.
+\end{aligned}
+\label{eq:problem}
+\end{equation}
+The policy $\pi$ uses only causally available information. Its admissible set $\mathcal F(s_t)$ includes routing eligibility, Eqs.~\eqref{eq:destination}--\eqref{eq:split}, communication and CPU limits, stage causality, flight restrictions, and battery requirements. Choosing $\bar e_k=0$ requests long-term energy neutrality. A positive $\bar e_k$ permits average net energy draw over a finite mission, without implying unlimited operation. Fleet and traffic configurations must allow feasible service, including local/RSU execution and landing where needed.
 
+\fi
 
+\section{Related Works}
+\label{related_works}
+The literature relevant to this work spans six connected themes:
+UAV-assisted mobile edge computing, queue-aware vehicular
+offloading, joint communication--computation--trajectory control,
+energy-aware aerial operation, multi-agent reinforcement learning,
+and meta-learning for rapid adaptation.  Rather than listing these
+areas independently, this section identifies what is already modeled,
+what remains absent, and how the present system is positioned.
 
+\subsection{UAV-Assisted MEC and End-to-End Task Service}
+UAV-assisted MEC reduces the distance between mobile users and edge
+servers, but it couples task latency to both radio service and aircraft
+position.  Zhang et al.~\cite{zhang2019mobile} jointly study stochastic
+offloading and UAV trajectory scheduling through Lyapunov
+optimization.  Liu et al.~\cite{liu2020uav} jointly optimize
+offloading, CPU operation, wireless power delivery, and trajectory.
+These works establish that communication, computation, and motion
+cannot be optimized independently.  Their service paths, however, do
+not provide the complete vehicle--RSU--multi-UAV--cloud queue network
+used here.
 
+For this report, task service is modeled as a lifecycle rather than as
+one algebraic delay expression.  Each task retains an identity while
+waiting in ingress, uploading, staging, computing, traversing UAV
+backhaul, and synchronizing its UAV and cloud branches.  This
+distinction matters because a small transmission time does not imply a
+small response time when the selected server is congested.
 
+\subsection{Queue-Aware Vehicular Offloading and UAV Path Planning}
+Lyapunov optimization converts a long-horizon stochastic control
+problem into queue-weighted slot decisions when the required
+feasibility, boundedness, and slack conditions hold
+\cite{neely2010stochastic}.  Mao et al.~\cite{mao2017dynamic} apply
+this principle to computation offloading with energy harvesting.
+Q-TOP~\cite{sun2026qtop} develops queue-aware task offloading and
+three-dimensional UAV path planning for vehicular computing and uses
+a genetic algorithm for the resulting per-slot problem.
 
+Q-TOP motivates the physical backlog and trajectory components of the
+present work.  The present model additionally represents transport and
+staging queues, task identities, UAV-to-cloud branches, and a virtual
+net-energy deficit.  CPU service uses weighted processor sharing rather
+than assigning a full processor independently to every task.
 
+\subsection{Multi-Agent and Hybrid-Action Reinforcement Learning}
+MADDPG~\cite{lowe2017multi} provides centralized critics for training
+coordinated agents while retaining role-local actors for execution.
+Decentralized vehicular resource allocation has also been studied with
+DRL~\cite{ye2021deep}.  PPO~\cite{schulman2017proximal} offers an
+on-policy alternative with clipped policy updates.  None of these
+algorithms alone supplies queue stability, energy causality, or flight
+safety.
 
+The action space in the present system is hybrid.  Holding and
+destination selection are categorical, whereas workload splitting,
+CPU frequency, CPU shares, and three-dimensional motion are
+continuous.  A masked hybrid actor and a state-dependent feasibility
+controller are therefore required.  A hybrid MAPPO implementation is
+retained as an independent comparator because the straight-through
+categorical gradient used by hybrid MADDPG is an approximation.
 
+\subsection{Meta-Reinforcement Learning and Adaptation}
+MAML~\cite{finn2017model} and Reptile~\cite{nichol2018reptile} learn
+initial parameters intended to adapt with few gradient updates.
+Yan et al.~\cite{yan2026rmaddpg} combine Reptile and MADDPG for
+computation allocation in a UAV/RSU/cloud MEC architecture.  Their
+formulation provides the closest meta-learning foundation for this
+work.  The present formulation adds vehicle-owned dispatch, persistent
+radio and compute queues, learned UAV motion, explicit battery
+feasibility, and adaptation without resetting physical network state.
 
+\subsection{Energy-Aware Flight and Replenishment}
+Flight, computation, reception, and backhaul transmission draw from
+the same finite UAV battery.  Existing UAV-MEC studies show the
+importance of joint motion and resource control
+\cite{zhang2019mobile,liu2020uav}; predictive deployment also links
+position to demand and mobility energy~\cite{zhang2020uav}.  In this
+report, immediate battery feasibility and a verified return/landing
+reserve are hard constraints, while a virtual deficit queue represents
+the long-run net-energy target.
 
+The implemented benchmark uses a bounded stochastic end-of-slot
+energy-arrival trace, including zero-harvest and outage cases.  A
+position-dependent laser-transfer expression is specified separately
+as an optional physical instantiation.  Laser-specific deployment
+claims require calibration and implementation of that optional model;
+they are not inferred from the stochastic benchmark.
 
+\subsection{Synthesis and Research Gap}
+Table~\ref{tab:scope_comparison} summarizes the gap.  Prior work
+supplies important parts of the solution, but no cited formulation
+simultaneously contains end-to-end persistent VEC queues, hybrid
+routing and resource actions, safe three-dimensional multi-UAV motion,
+finite UAV/cloud service, and Reptile adaptation with the physical
+state carried across updates.
 
+\begin{table*}[t]
+\centering
+\caption{Positioning of the present model relative to the main research streams.}
+\label{tab:scope_comparison}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{p{0.19\textwidth}p{0.32\textwidth}p{0.41\textwidth}}
+\hline
+\textbf{Research stream} & \textbf{Established capability} &
+\textbf{Gap addressed in this report}\\
+\hline
+UAV-assisted MEC & Joint offloading, CPU control, and trajectory-aware
+service & Explicit vehicle/RSU/UAV/cloud stage queues and task
+completion records\\
+Queue-aware VEC & Lyapunov-weighted offloading and UAV path planning &
+Transport queues, cloud branches, weighted CPU sharing, and censored
+unfinished tasks\\
+MADDPG/PPO & Coordinated continuous or stochastic policy learning &
+Masked categorical routing combined with continuous split, CPU, and
+motion actions\\
+Meta-RL & Fast adaptation from a learned initialization & Adaptation
+while retaining queues, task ages, positions, and batteries\\
+Energy-aware UAV control & Propulsion and computation energy models &
+Whole-UAV energy ledger, stochastic replenishment, and verified
+return/landing reserve\\
+\hline
+\end{tabular}
+\end{table*}
 
+\section{System Model}
+\label{system_model}
 
+This section develops the mathematical models governing every physical and
+computational stage of the vehicle--RSU--UAV--cloud architecture.  Following
+the service sequence in Fig.~\ref{fig:service_graph}, the presentation proceeds
+from network topology and slot timing to vehicle mobility, task generation and
+offloading, wireless communication, computation and queueing, UAV motion, and
+energy consumption and replenishment.  Section~\ref{problem_formulation} then
+consolidates these models into the long-term control problem.
 
+\subsection{Network Architecture and Time-Slot Model}
+\label{subsec:network_model}
+We consider a bounded rectangular service region
+$\mathcal A\subset\mathbb R^2$.  The node sets are
+$\mathcal V=\{1,\ldots,V\}$ for vehicles,
+$\mathcal R=\{1,\ldots,R\}$ for fixed RSUs, and
+$\mathcal U=\{1,\ldots,U\}$ for rotary-wing UAV edge servers;
+$c$ denotes a remote cloud.  Vehicle and RSU positions are
+$\boldsymbol p_v(t)=[x_v(t),y_v(t),0]^{\mathsf T}$ and
+$\boldsymbol p_r=[x_r,y_r,0]^{\mathsf T}$, while UAV position and
+velocity are $\boldsymbol p_k(t)\in\mathbb R^3$ and
+$\boldsymbol u_k(t)\in\mathbb R^3$.
 
+Time is slotted, $t\in\{0,1,\ldots\}$, with duration $\Delta>0$.
+The state observed at the start of slot $t$ contains queues, eligible
+task records, node positions, UAV velocities, physical battery charge,
+virtual energy deficits, and current channel summaries.  The slot
+order is:
+\begin{enumerate}
+\item observe start-of-slot state and generate control proposals;
+\item repair proposals and execute radio, CPU, and flight service using
+only work eligible at the start of the slot;
+\item commit completed stage transfers at the boundary;
+\item add external tasks and realized harvested energy; and
+\item record completions, deadline crossings, cost, and the transition.
+\end{enumerate}
+Consequently, a transfer completed in slot $t$ can receive downstream
+service no earlier than slot $t+1$.
 
+\begin{figure*}[t]
+\centering
+\renewcommand{\arraystretch}{1.35}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{c c c c c c c}
+\fbox{\parbox{0.12\textwidth}{\centering Vehicle task\\arrival}}
+&$\longrightarrow$&
+\fbox{\parbox{0.12\textwidth}{\centering Ingress\\queue}}
+&$\longrightarrow$&
+\fbox{\parbox{0.12\textwidth}{\centering Local CPU}}
+&$\longrightarrow$&
+\fbox{\parbox{0.10\textwidth}{\centering Complete}}\\
+&&$\searrow$&&&&\\[-1.0ex]
+&&\fbox{\parbox{0.12\textwidth}{\centering V2R upload}}
+&$\longrightarrow$&
+\fbox{\parbox{0.12\textwidth}{\centering RSU CPU}}
+&$\longrightarrow$&
+\fbox{\parbox{0.10\textwidth}{\centering Complete}}\\
+&&$\searrow$&&&&\\[-1.0ex]
+&&\fbox{\parbox{0.12\textwidth}{\centering V2U upload}}
+&$\longrightarrow$&
+\fbox{\parbox{0.12\textwidth}{\centering UAV CPU}}
+&$\longrightarrow$&
+\fbox{\parbox{0.10\textwidth}{\centering Merge}}\\
+&&&&$\searrow$&&$\uparrow$\\[-1.0ex]
+&&&&\fbox{\parbox{0.12\textwidth}{\centering UAV--cloud\\backhaul}}
+&$\longrightarrow$&
+\fbox{\parbox{0.10\textwidth}{\centering Cloud CPU}}
+\end{tabular}
+\caption{End-to-end task service graph.  Every box is represented by a
+persistent task or queue stage.  Transfers committed at one boundary
+become eligible at the following boundary.}
+\label{fig:service_graph}
+\end{figure*}
 
+The core architecture has no direct vehicle-to-cloud or RSU-to-cloud
+route, no inter-UAV task migration, and no reassignment after
+dispatch.  Radio transmit powers are fixed and uplinks use orthogonal
+bandwidth.  These choices isolate the routing, CPU, split, and
+trajectory decisions studied here.
 
+\begin{table*}[t]
+\centering
+\caption{Principal system notation.}
+\label{tab:notation}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{p{0.13\textwidth}p{0.31\textwidth}p{0.13\textwidth}p{0.30\textwidth}}
+\hline
+\textbf{Symbol} & \textbf{Meaning} & \textbf{Symbol} & \textbf{Meaning}\\
+\hline
+$\Delta$ & Slot duration &
+$\ell_i$ & Immutable task specification\\
+$b_i,c_i,\chi_i$ & Input bits, CPU cycles, cycles per bit &
+$a_i,d_i$ & Arrival time and deadline allowance\\
+$Q_j(t)$ & Equivalent-cycle backlog of stage queue $j$ &
+$A_j(t),S_j(t)$ & Realized queue arrival and service\\
+$W_{ih}(t),R_{ih}(t)$ & Link bandwidth and transmission rate &
+$f_n(t),w_{in}(t)$ & CPU frequency and task share\\
+$B_k(t),H_k(t)$ & Physical UAV charge and harvested energy &
+$Z_k(t)$ & Virtual net-energy deficit\\
+$\boldsymbol p_v,\boldsymbol p_r,\boldsymbol p_k$ &
+Vehicle, RSU, and UAV positions &
+$\rho_i$ & UAV-local workload fraction\\
+\hline
+\end{tabular}
+\end{table*}
 
+\subsection{Vehicle Mobility and Coverage Model}
+Synthetic vehicles follow declared road polylines.  Let
+$\boldsymbol r_v(s)$ map route distance $s\in[0,L_v]$ to a 3-D road
+coordinate, and let $\nu_v(t)\ge0$ be vehicle speed.  Route progress
+obeys
+\begin{equation}
+\begin{aligned}
+s_v(t+1)&=\mathscr R_v\!\left(
+s_v(t)+\sigma_v(t)\nu_v(t)\Delta\right),\\
+\boldsymbol p_v(t)&=\boldsymbol r_v(s_v(t)),
+\end{aligned}
+\label{eq:vehicle_motion}
+\end{equation}
+where $\sigma_v(t)\in\{-1,1\}$ is direction and
+$\mathscr R_v$ either wraps a loop or reflects progress at a route
+endpoint.  For recorded SUMO experiments, Eq.~\eqref{eq:vehicle_motion}
+is replaced by the complete sampled trace
+$\boldsymbol p_v(t)=\boldsymbol p_v^{\mathrm{trace}}(t)$; missing
+vehicle frames are rejected rather than interpolated.
 
+The three-dimensional distance from vehicle $v$ to edge node
+$n\in\mathcal R\cup\mathcal U$ and its horizontal component are
+\begin{equation}
+d_{vn}(t)=\|\boldsymbol p_v(t)-\boldsymbol p_n(t)\|,\qquad
+d_{vn}^{\mathrm H}(t)=
+\|[\boldsymbol p_v(t)-\boldsymbol p_n(t)]_{1:2}\|.
+\label{eq:distances}
+\end{equation}
+Coverage indicators are
+$\mathbf 1\{d_{vr}^{\mathrm H}\le D_R\}$ for RSUs and
+$\mathbf 1\{d_{vk}^{\mathrm H}\le D_U\}$ for UAVs.  A destination is
+masked whenever it is outside coverage, inactive, returning, or lacks
+an admissible energy contingency.
 
+\subsection{Task Generation, Lifecycle, and Offloading Model}
+\label{subsec:task_model}
+\subsubsection{Task Arrival and Persistent Record Model}
+At slot $t$, vehicle $v$ generates $A_v^{\mathrm{task}}(t)$ jobs.  The
+controlled synthetic benchmark uses
+\begin{equation}
+\begin{aligned}
+A_v^{\mathrm{task}}(t)&\sim
+\operatorname{Poisson}(\lambda_v(t)),\\
+b_i&\in[b_{\min},b_{\max}],\quad
+c_i\in[c_{\min},c_{\max}],\\
+d_i&\in[d_{\min},d_{\max}],
+\end{aligned}
+\label{eq:task_arrival}
+\end{equation}
+with bounded independent draws recorded once in a scenario trace.
+Low-load, near-capacity, overload, and surge cases differ through
+$\lambda_v(t)$.  Each task has immutable record
+\begin{equation}
+\ell_i=(i,v(i),b_i,c_i,a_i,d_i,\zeta_i),\qquad
+\chi_i=\frac{c_i}{b_i},
+\label{eq:task_record}
+\end{equation}
+where $\zeta_i\in\{0,1\}$ identifies whether the job is partitionable.
 
+\subsubsection{Destination Selection and Partitioning Model}
+Let $h_i(t)$ denote holding in ingress and let $x_i^L(t)$,
+$x_{ir}^R(t)$, and $x_{ik}^U(t)$ be local, RSU, and UAV dispatch
+indicators.  Before dispatch,
+\begin{equation}
+h_i(t)+x_i^L(t)+\sum_{r\in\mathcal R}x_{ir}^R(t)
+ +\sum_{k\in\mathcal U}x_{ik}^U(t)=1,
+\quad x,h\in\{0,1\}.
+\label{eq:destination}
+\end{equation}
+If $h_i=1$, the task remains in ingress.  Once a non-hold choice is
+made, its destination and dispatch time are fixed.
 
+For a UAV destination, the complete input is first uploaded to the
+chosen UAV.  The UAV executes fraction $\rho_i$ and forwards the
+remainder to the cloud:
+\begin{equation}
+c_i^U=\rho_i c_i,\qquad
+c_i^c=(1-\rho_i)c_i,\qquad
+b_i^{\mathrm{bh}}=(1-\rho_i)b_i.
+\label{eq:split}
+\end{equation}
+For indivisible work, $\rho_i=1$.  For partitionable work,
+$0\le\rho_i\le1$ is fixed at dispatch.  Completion requires every
+nonempty branch followed by merge delay $\tau_i^{\mathrm{merge}}$.
 
+\subsubsection{End-to-End Completion and Delay Model}
+With actual completion time $f_i^{\mathrm{done}}$, response time and
+deadline success are
+\begin{equation}
+T_i=f_i^{\mathrm{done}}-a_i,\qquad
+\delta_i=\mathbf 1\{T_i\le d_i\}.
+\label{eq:actual_latency}
+\end{equation}
+A first deadline crossing emits one miss event, but the task remains in
+the network.  An unfinished task at the end of a finite trace is
+reported as censored rather than assigned an artificial latency.
 
+\subsection{Communication and OFDMA Service Model}
+\subsubsection{Vehicle-to-RSU Terrestrial Channel Model}
+For a vehicle--RSU link, the deterministic large-scale gain is
+\begin{equation}
+g_{vr}^{R}(t)=g_0
+\max\{d_{vr}(t),d_{\min}^{\mathrm{ch}}\}^{-\alpha_R},
+\label{eq:rsu_gain}
+\end{equation}
+where $g_0$ is reference gain and $\alpha_R$ is the terrestrial
+path-loss exponent.
 
+\subsubsection{Vehicle-to-UAV Air-to-Ground Channel Model}
+For a vehicle--UAV link, elevation angle and LoS probability are
+\begin{equation}
+\begin{aligned}
+\vartheta_{vk}(t)&=
+\frac{180}{\pi}\tan^{-1}\!\left(
+\frac{|z_k(t)-z_v(t)|}
+{\max\{d_{vk}^{\mathrm H}(t),d_{\min}^{\mathrm{ch}}\}}\right),\\
+p_{vk}^{\mathrm{LoS}}(t)&=
+\left[1+a_{\mathrm L}
+\exp\{-b_{\mathrm L}[\vartheta_{vk}(t)-a_{\mathrm L}]\}\right]^{-1}.
+\end{aligned}
+\label{eq:los}
+\end{equation}
+The mean aerial gain is
+\begin{equation}
+\begin{aligned}
+g_{vk}^{U}(t)={}&g_0
+\max\{d_{vk}(t),d_{\min}^{\mathrm{ch}}\}^{-\alpha_U}\\
+&\times\left[p_{vk}^{\mathrm{LoS}}\eta_{\mathrm L}
++(1-p_{vk}^{\mathrm{LoS}})\eta_{\mathrm N}\right],
+\end{aligned}
+\label{eq:uav_gain}
+\end{equation}
+where $\eta_{\mathrm L}=10^{-L_{\mathrm L}/10}$ and
+$\eta_{\mathrm N}=10^{-L_{\mathrm N}/10}$ represent additional LoS
+and NLoS losses.
 
+\subsubsection{OFDMA Rate and Transmission-Service Model}
+For link $h$ with assigned bandwidth $W_{ih}(t)$, fixed vehicle power
+$P_v^{\mathrm{tx}}$, and gain $g_{ih}(t)$, the rate is
+\begin{equation}
+R_{ih}(t)=W_{ih}(t)\log_2\!\left(
+1+\frac{P_v^{\mathrm{tx}}g_{ih}(t)}
+{N_0W_{ih}(t)+I_{ih}(t)}\right).
+\label{eq:rate}
+\end{equation}
+Orthogonal operation gives $I_{ih}=0$ and
+$\sum_iW_{ih}\le W_h^{\max}$.
 
+The shared deterministic scheduler assigns priority
+\begin{equation}
+\begin{aligned}
+\pi_{ih}(t)&=q_{ih}^{\mathrm{eq}}(t)
+\left[1+\min\left\{\frac{\operatorname{age}_i(t)}{d_i},
+\kappa_{\mathrm{age}}\right\}\right],\\
+W_{ih}(t)&=W_h^{\max}
+\frac{\pi_{ih}(t)}{\sum_{\ell\in\mathcal E_h}\pi_{\ell h}(t)}.
+\end{aligned}
+\label{eq:ofdma}
+\end{equation}
+over eligible links $\mathcal E_h$, with task ID resolving exact ties.
+Here $q_{ih}^{\mathrm{eq}}$ is the link backlog in equivalent cycles.
+A transfer of $s_{ih}^{\mathrm{tr}}$ equivalent cycles must obey
+\begin{equation}
+\sum_i\frac{s_{ih}^{\mathrm{tr}}(t)}{\chi_i}
+\le\Delta R_h(t).
+\label{eq:radio_capacity}
+\end{equation}
+Loss of coverage gives zero current service; outstanding bits remain
+at their original upload queue.
+
+\subsection{Computation, Backhaul, and Queueing Model}
+\subsubsection{Persistent Multi-Stage Queue Model}
+The queue set $\mathcal J$ contains ingress, V2R/V2U upload,
+receive/staging, local/RSU/UAV compute, UAV backhaul, cloud receive,
+and cloud compute stages.  Bit queues are converted only for drift
+accounting: $b$ residual bits of task $i$ equal $\chi_i b$ cycles.
+
+For each queue $j$, realized service $S_j(t)$ and arrivals $A_j(t)$
+give
+\begin{equation}
+Q_j(t+1)=Q_j(t)-S_j(t)+A_j(t),\qquad
+0\le S_j(t)\le Q_j(t).
+\label{eq:queue}
+\end{equation}
+If $F_{ab}(t)$ moves equivalent work from stage $a$ to stage $b$,
+then it appears as $-F_{ab}$ in the source increment and $+F_{ab}$ in
+the destination increment.  Thus
+\begin{equation}
+\sum_{j\in\mathcal J}Q_j(t+1)=
+\sum_{j\in\mathcal J}Q_j(t)+A^{\mathrm{ext}}(t)-C^{\mathrm{final}}(t),
+\label{eq:conservation}
+\end{equation}
+up to explicitly logged branch creation and merge bookkeeping.
+Internal routing cannot destroy work; only final computation removes
+it.
+
+\subsubsection{CPU Service and Processor-Sharing Model}
+At compute node $n$, frequency $f_n$, task shares $w_{in}$, and ready
+residual work $c_{in}^{\mathrm{elig}}$ satisfy
+\begin{equation}
+\begin{aligned}
+0&\le f_n(t)\le f_n^{\max},\\
+w_{in}(t)&\ge0,\qquad \sum_iw_{in}(t)\le1,\\
+0\le s_{in}^{\mathrm{cpu}}(t)&\le
+\min\{c_{in}^{\mathrm{elig}}(t),\Delta f_n(t)w_{in}(t)\}.
+\end{aligned}
+\label{eq:cpu_capacity}
+\end{equation}
+Unused capacity from a task that finishes early is redistributed among
+remaining positive-share tasks.  Local vehicle and cloud scheduling,
+together with the RSU clock frequency, are fixed in the core experiments.
+RSU task shares and both UAV frequency and task shares are controlled.
+
+\subsubsection{UAV Backhaul and Cloud-Service Model}
+The cloud branch of UAV task $i$ first traverses a finite backhaul:
+\begin{equation}
+\sum_{i\in\mathcal B_k(t)}
+\frac{s_{ik}^{\mathrm{bh}}(t)}{\chi_i}
+\le\Delta R_k^{\mathrm{bh}},
+\qquad
+\sum_i s_{ic}^{\mathrm{cpu}}(t)\le\Delta f_c.
+\label{eq:cloud_capacity}
+\end{equation}
+Backhaul completion releases $(1-\rho_i)c_i$ cycles into cloud
+computation at the next boundary.  The task finishes only after the UAV
+and cloud branches, if nonempty, have both completed.
+
+\subsubsection{Queue-Stability Target}
+The desired strong-stability condition is
+\begin{equation}
+\limsup_{T\to\infty}\frac1T\sum_{t=0}^{T-1}
+\mathbb E[Q_j(t)]<\infty,\qquad j\in\mathcal J.
+\label{eq:stability}
+\end{equation}
+This condition is meaningful only for stabilizable offered load.
+Overload experiments intentionally report queue growth.
+
+\subsection{UAV Movement and Collision-Avoidance Model}
+Let horizontal speed be $v_k^{\mathrm H}$, azimuth $\theta_k$, and
+vertical speed $v_k^z$.  The velocity and position update are
+\begin{equation}
+\begin{aligned}
+\boldsymbol u_k(t)&=
+\begin{bmatrix}
+v_k^{\mathrm H}\cos\theta_k&
+v_k^{\mathrm H}\sin\theta_k&v_k^z
+\end{bmatrix}^{\mathsf T},\\
+\boldsymbol p_k(t+1)&=\boldsymbol p_k(t)+\Delta\boldsymbol u_k(t).
+\end{aligned}
+\label{eq:uav_motion}
+\end{equation}
+Admissible motion obeys speed, climb/descent, map, altitude, and
+acceleration bounds:
+\begin{equation}
+\begin{aligned}
+\|\boldsymbol u_k(t)\|&\le v_k^{\max},\\
+-v_k^{\mathrm{down}}&\le v_k^z(t)\le v_k^{\mathrm{up}},\\
+\|\boldsymbol u_k(t)-\boldsymbol u_k(t-1)\|&\le a_k^{\max}\Delta.
+\end{aligned}
+\label{eq:flight_bounds}
+\end{equation}
+Every pair of airborne UAVs must remain separated along the complete
+linear slot trajectories:
+\begin{equation}
+\min_{\tau\in[0,\Delta]}
+\|\boldsymbol p_k(t)+\tau\boldsymbol u_k(t)
+-\boldsymbol p_l(t)-\tau\boldsymbol u_l(t)\|
+\ge d_{\mathrm{safe}}.
+\label{eq:collision}
+\end{equation}
+The controller also preserves sufficient stopping distance to map and
+altitude boundaries.  A verified return/landing plan is a sequence of
+segments satisfying the same limits, terminating at a declared landing
+site with near-zero velocity.
+
+\subsection{UAV and Infrastructure Energy-Consumption Models}
+\subsubsection{Rotary-Wing Flight and Hovering-Energy Model}
+The propulsion ledger explicitly separates motion from hovering, following
+the energy-accounting organization in~\cite{talukdar2026bamappo}.  Let
+$\tau_k^{\mathrm{fly}}(t)$ and $\tau_k^{\mathrm{hov}}(t)$ denote the
+airborne flight and near-zero-velocity hovering intervals in slot $t$, with
+$\tau_k^{\mathrm{fly}}+\tau_k^{\mathrm{hov}}\le\Delta$.  Over a flying
+interval, horizontal and vertical power are modeled as
+\begin{equation}
+\begin{aligned}
+P_k^{\mathrm{fly}}={}&P_0\!\left(1+
+\frac{c_p(v_k^{\mathrm H})^2}{U_{\mathrm{tip}}^2}\right)\\
+&+P_i\!\left(\sqrt{1+\frac{(v_k^{\mathrm H})^4}{4v_0^4}}\right.\\
+&\left.\hspace{3.1em}-\frac{(v_k^{\mathrm H})^2}{2v_0^2}\right)^{1/2}\\
+&+c_d(v_k^{\mathrm H})^3
++c_{\uparrow}[v_k^z]^+
++c_{\downarrow}[-v_k^z]^+
++c_z(v_k^z)^2 .
+\end{aligned}
+\label{eq:propulsion}
+\end{equation}
+Here $P_0$ and $P_i$ are respectively the blade-profile and induced
+hover powers, $U_{\mathrm{tip}}$ is rotor-tip speed, $v_0$ is mean induced
+velocity in hover, and the remaining calibrated coefficients account for
+horizontal drag and ascent/descent.  At near-zero horizontal and vertical
+velocity, the model reduces to the explicit hovering power
+\begin{equation}
+\begin{aligned}
+P_k^{\mathrm{hov}}&=P_0+P_i,\\
+E_k^{\mathrm{fly}}(t)&=P_k^{\mathrm{fly}}(t)
+ \tau_k^{\mathrm{fly}}(t),\\
+E_k^{\mathrm{hov}}(t)&=P_k^{\mathrm{hov}}
+ \tau_k^{\mathrm{hov}}(t),\\
+E_k^{\mathrm{prop}}(t)&=E_k^{\mathrm{fly}}(t)
+ +E_k^{\mathrm{hov}}(t).
+\end{aligned}
+\label{eq:hovering}
+\end{equation}
+Thus a hovering interval is not charged again as a flying interval.  The
+current piecewise-constant slot implementation sets
+$(\tau_k^{\mathrm{fly}},\tau_k^{\mathrm{hov}})=(\Delta,0)$ for a nonzero
+airborne motion command and $(0,\Delta)$ for an airborne hover; the split
+notation also permits later sub-slot scheduling.  The
+unused portion of the slot corresponds to a landed or otherwise non-airborne
+mode and incurs zero airborne propulsion power.  Equation~\eqref{eq:propulsion}
+is a calibrated bounded-flight approximation rather than a full aerodynamic
+model.
+
+\subsubsection{Computation and Communication-Energy Model}
+For computed cycles $s_k^{\mathrm{cpu}}$, let $P_k^{\mathrm{rx}}$ denote
+the receiver-chain power while UAV $k$ accepts vehicle uplink data and let
+$\tau_k^{\mathrm{rx}}$ be the corresponding active reception interval.
+Likewise, $P_k^{\mathrm{bh}}$ is the UAV transmitter power on the
+UAV--cloud backhaul and $\tau_k^{\mathrm{bh}}$ is its active transmission
+interval.  Finally, $P_k^{\mathrm{ctrl}}$ and
+$\tau_k^{\mathrm{ctrl}}$ account for avionics and control electronics while
+the UAV is active.  These quantities are powers in watts and active times in
+seconds; their products are energies in joules.  The component energies are
+\begin{equation}
+\begin{aligned}
+E_k^{\mathrm{cpu}}&=\kappa_k f_k^2s_k^{\mathrm{cpu}},\\
+E_k^{\mathrm{rx}}&=P_k^{\mathrm{rx}}\tau_k^{\mathrm{rx}},&
+E_k^{\mathrm{bh}}&=P_k^{\mathrm{bh}}\tau_k^{\mathrm{bh}},\\
+E_k^{\mathrm{ctrl}}&=P_k^{\mathrm{ctrl}}\tau_k^{\mathrm{ctrl}}.&&
+\end{aligned}
+\label{eq:energy_components}
+\end{equation}
+Total UAV expenditure is
+\begin{equation}
+E_k=E_k^{\mathrm{fly}}+E_k^{\mathrm{hov}}+E_k^{\mathrm{cpu}}
++E_k^{\mathrm{rx}}+E_k^{\mathrm{bh}}+E_k^{\mathrm{ctrl}}.
+\label{eq:uav_energy}
+\end{equation}
+Vehicle uplink energy is $P_v^{\mathrm{tx}}\tau_v^{\mathrm{tx}}$.
+RSU and cloud compute energy use the same
+$\kappa_nf_n^2s_n^{\mathrm{cpu}}$ accounting, with their receiver
+energy charged separately.  System energy sums ownership components
+once.
+
+\subsection{Energy-Harvesting, Battery, and Return-Reserve Model}
+\subsubsection{Stochastic Energy-Replenishment Model}
+The implemented replenishment trace is
+\begin{equation}
+H_k(t)=I_k^{\mathrm{src}}(t)\,\bar H_k\,\xi_k(t),\qquad
+\xi_k(t)\sim\mathcal U[1-\delta_H,1+\delta_H],
+\label{eq:stochastic_harvest}
+\end{equation}
+where $I_k^{\mathrm{src}}(t)=0$ during a declared outage and one
+otherwise.  The benchmark uses $\delta_H=0.2$; zero-harvest scenarios
+set $\bar H_k=0$.  Realizations are sampled once and shared by every
+compared controller.
+
+\subsubsection{Optional Position-Dependent Laser-Transfer Model}
+If a laser source at $\boldsymbol p_L$ is later instantiated, a
+position-dependent optional model is
+\begin{equation}
+\begin{aligned}
+d_{Lk}(t)&=\|\boldsymbol p_k(t)-\boldsymbol p_L\|,\\
+P_k^{\mathrm{rec}}(t)&=
+P_L(t)\frac{A_k}{[\theta_Ld_{Lk}(t)]^2}
+\exp[-\kappa_{\mathrm{atm}}(t)d_{Lk}(t)]
+\eta_k^{\mathrm{align}}(t),\\
+H_k^{\mathrm{laser}}(t)&=\Delta\eta_k^{\mathrm{pv}}
+P_k^{\mathrm{rec}}(t).
+\end{aligned}
+\label{eq:optional_laser}
+\end{equation}
+This optional expression requires calibrated beam divergence,
+atmospheric attenuation, alignment, aperture, and photovoltaic
+efficiency.  It is not used in the current stochastic benchmark.
+
+\subsubsection{Battery Evolution, Energy Causality, and Landing Reserve}
+Let $B_k^{\mathrm{pre}}(t+1)$ be the charge immediately after slot
+expenditure but before end-of-slot replenishment.  The battery constraints
+are
+\begin{equation}
+\begin{aligned}
+B_k^{\mathrm{pre}}(t+1)&=B_k(t)-E_k(t),\\
+B_k(t+1)&=\min\{B_k^{\max},
+B_k^{\mathrm{pre}}(t+1)+H_k(t)\},\\
+0&\le B_k(t)\le B_k^{\max},\qquad
+0\le E_k(t)\le B_k(t).
+\end{aligned}
+\label{eq:battery}
+\end{equation}
+Thus harvested energy becomes usable only after the current expenditure has
+been paid; it cannot finance an action earlier in the same slot.  To combine
+a declared emergency floor with state-dependent return safety, define
+$B_k^{\min}=\xi_kB_k^{\max}$ for $\xi_k\in[0,1)$ when such a floor is
+specified (and $B_k^{\min}=0$ otherwise), and
+\[
+B_k^{\mathrm{safe}}(t+1)=\max\!\left\{B_k^{\min},
+B_k^{\mathrm{res}}(\boldsymbol p_k(t+1),\boldsymbol u_k(t))\right\}.
+\]
+Normal service must satisfy the stronger energy-causality constraint
+\begin{equation}
+B_k^{\mathrm{pre}}(t+1)\ge B_k^{\mathrm{safe}}(t+1).
+\label{eq:reserve}
+\end{equation}
+Here $B_k^{\mathrm{res}}$ is the energy of a verified return/landing plan
+computed without relying on future harvesting.  Battery overflow
+$O_k(t)=[B_k^{\mathrm{pre}}(t+1)+H_k(t)-B_k^{\max}]^+$ is logged rather
+than credited as usable energy.  A UAV that cannot preserve
+Eq.~\eqref{eq:reserve} enters a verified return/landing contingency;
+returning and landed UAVs are unavailable as new destinations.
+
+\section{Problem Formulation}
+\label{problem_formulation}
+
+The preceding component models are coupled through the controller's dispatch,
+partitioning, CPU-allocation, and UAV-motion decisions.  This section first
+defines the per-slot cost used by the learning and Lyapunov layers and then
+states the long-term stochastic optimization problem with all physical
+constraints retained explicitly.
+
+\subsection{Instantaneous Cost Model}
+Let $N(t)$ count all unfinished tasks and let $M(t)$ count first
+deadline crossings in slot $t$.  The normalized instantaneous cost is
+\begin{equation}
+C(t)=w_L\frac{\Delta N(t)}{L_{\mathrm{ref}}}
++w_E\frac{E^{\mathrm{sys}}(t)}{E_{\mathrm{ref}}}
++w_DM(t).
+\label{eq:cost}
+\end{equation}
+Fixed references make costs comparable across scenarios.  Summed
+occupancy approximates aggregate sojourn time for a drained trace, but
+reported latency is still computed from Eq.~\eqref{eq:actual_latency}.
+
+\subsection{Long-Term Stochastic Optimization Problem}
+Collect all dispatch, split, CPU, and motion decisions in
+$\boldsymbol\alpha(t)$.  The long-run problem is
+\begin{equation}
+\begin{aligned}
+\mathcal P:\quad \min_{\pi}\;&
+\limsup_{T\to\infty}\frac1T
+\sum_{t=0}^{T-1}\mathbb E_{\pi}[C(t)]\\
+\mathrm{s.t.}\;&
+\boldsymbol\alpha(t)\in\mathcal F(s_t),\quad
+\text{Eq.~\eqref{eq:stability}},\\
+&\limsup_{T\to\infty}\frac1T\sum_{t=0}^{T-1}
+\mathbb E_{\pi}[E_k(t)-H_k(t)]\le\bar e_k .
+\end{aligned}
+\label{eq:problem}
+\end{equation}
+The feasible set $\mathcal F(s_t)$ contains routing masks, radio and
+CPU capacity, stage causality, motion and separation limits, immediate
+battery causality, and return reserve.  Setting $\bar e_k=0$ requests
+long-run energy neutrality; $\bar e_k>0$ permits declared average
+battery draw during a finite mission.
 
 \section{Proposed Methodology}
 \label{proposed_methodology}
-Our methodology integrates meta-reinforcement learning (R-MADDPG) with Lyapunov optimization to manage the dynamic vehicular environment.
+The controller is built in three stages. A Lyapunov construction first
+produces a backlog- and energy-weighted score. Hybrid MADDPG learns to
+approximate admissible control decisions for that score, and Reptile trains an
+initialization for subsequent adaptation. Parameter learning operates
+alongside the physical service model without resetting its state.  Following
+the explicit state--action--transition--reward presentation commonly used for
+multi-UAV CTDE controllers~\cite{talukdar2026bamappo}, this section first
+states the constrained Markov model and then gives the learning, training, and
+complexity details of the proposed method.
 
-\subsection{Lyapunov Queue and Energy Management}
-To ensure long-term stability without suffering from indefinite task accumulation or complete battery depletion, we employ Lyapunov optimization. We define virtual queues for UAV energy deficits and physical queues for task backlogs. By minimizing a drift-plus-penalty function at each time slot, the system balances immediate performance optimization (latency and energy cost) with long-term queue stability and energy sustainability.
+\subsection{Constrained Markov Decision Process and Multi-Agent Factorization}
+The slot controller is represented by the discounted constrained Markov
+decision process
+\begin{equation}
+\mathcal M=\left(\mathcal S,\{\mathcal O_g\}_{g\in\mathcal G},
+\mathcal A,\mathcal P,\mathcal R,\gamma\right),
+\qquad \mathcal G=\{\mathrm V,\mathrm R,\mathrm U\},
+\label{eq:mdp_tuple}
+\end{equation}
+where $\mathcal S$ is the global state space, $\mathcal O_g$ is the
+role-local observation space, $\mathcal A$ is the joint hybrid action space,
+$\mathcal P$ is the transition kernel induced by the system model,
+$\mathcal R$ is the common reward, and $\gamma\in[0,1)$ is the discount
+factor.  The global formulation is used during centralized training; each
+actor receives only its permitted local observation during decentralized
+execution.
 
-\subsection{Meta-MADDPG Decision Engine}
-We use Multi-Agent Deep Deterministic Policy Gradient (MADDPG) to determine optimal offloading, resource allocation, and 3-D UAV movement. To overcome the limitations of standard DRL in rapidly changing vehicular environments, we embed MADDPG within a Reptile Meta-Learning framework. The outer meta-learning module learns robust initial weights across diverse environmental distributions. When encountering a new scenario (e.g., altered traffic density or energy arrival rates), the inner module rapidly adapts the policy with minimal gradient steps.
+\subsubsection{State and Local Observation Spaces}
+A sufficient simulator state at the beginning of slot $t$ is
+\begin{equation}
+\begin{aligned}
+s_t=\big(&\{Q_j(t)\}_{j\in\mathcal J},
+\{\ell_i,\sigma_i(t),b_i^{\mathrm{rem}}(t),c_i^{\mathrm{rem}}(t)\}_i,\\
+&\{\boldsymbol p_v(t)\}_v,\{\boldsymbol p_k(t),\boldsymbol u_k(t),
+B_k(t),Z_k(t),m_k(t)\}_k,\boldsymbol c_t\big),
+\end{aligned}
+\label{eq:mdp_state}
+\end{equation}
+where $\sigma_i(t)$ identifies the task stage, $m_k(t)$ is UAV activity mode,
+and $\boldsymbol c_t$ contains the channel and available-resource summaries.
+Variable task sets are padded to a declared maximum and accompanied by masks;
+the physical queues still retain every task.  Agent $h$ in role $g$ observes
+$o_h(t)=\mathcal O_h(s_t)$, consisting of its own queues, visible task
+features, position or capacity, and advertised summaries required for its
+decision.  If the exogenous mobility, channel, or harvesting process is not
+Markov under these features, observation history or a recurrent encoder is
+required; the current implementation uses the listed instantaneous features.
 
-\subsection{System Workflow}
-The workflow is summarized as follows:
-\begin{enumerate}
-    \item \textbf{Observation:} The system monitors vehicle mobility, task arrivals, UAV states (position, energy), and queue lengths.
-    \item \textbf{Decision Making:} The Meta-MADDPG agents select tasks to offload, compute resource allocation, and plan 3-D UAV trajectories.
-    \item \textbf{Constraint Satisfaction:} Decisions are bounded by the Lyapunov penalty, ensuring overloaded queues redirect tasks to alternative nodes (RSU or Cloud) and low-energy UAVs conserve propulsion energy.
-\end{enumerate}
+\subsubsection{Hybrid Joint Action Space}
+Let $i_v(t)$ be the eligible head task owned by vehicle $v$.  The role actions
+are summarized as
+\begin{equation}
+\begin{aligned}
+a_v(t)&=\big(h_i,x_i^L,\{x_{ir}^R\}_r,\{x_{ik}^U\}_k,\rho_i\big),\\
+a_r(t)&=\{w_{ir}(t)\}_{i\in\mathcal I_r(t)},\\
+a_k(t)&=\big(\bar f_k(t),\{w_{ik}(t)\}_{i\in\mathcal I_k(t)},
+\boldsymbol u_k(t)\big),\\
+\boldsymbol\alpha_t&=\big(\{a_v(t)\}_v,\{a_r(t)\}_r,\{a_k(t)\}_k\big).
+\end{aligned}
+\label{eq:mdp_action}
+\end{equation}
+Vehicle actions combine a categorical hold/destination choice with a
+continuous UAV-local split.  RSU actors allocate processor shares while the
+current implementation keeps the configured RSU clock fixed.  UAV actors
+select normalized clock frequency, processor shares, and three-dimensional
+motion.  Masks remove unavailable destinations and absent tasks.  A proposal
+$\widehat{\boldsymbol\alpha}_t$ is executed only after
+$\boldsymbol\alpha_t=\mathscr P_{s_t}(\widehat{\boldsymbol\alpha}_t)
+\in\mathcal F(s_t)$ enforces the constraints of Sections~III--IV.
 
-\section{Numerical Results}
+\subsubsection{Transition, Reward, and Control Objective}
+Given the repaired action, the environment transition is
+\begin{equation}
+s_{t+1}\sim\mathcal P(\cdot\mid s_t,\boldsymbol\alpha_t),
+\label{eq:mdp_transition}
+\end{equation}
+where deterministic queue, service, battery, and motion updates are combined
+with stochastic task arrivals, channels, and harvested energy.  Every role
+receives the common Lyapunov-shaped reward and maximizes
+\begin{equation}
+r_t=\mathcal R(s_t,\boldsymbol\alpha_t)=-G(t),\qquad
+J(\pi)=\mathbb E_{\pi}\!\left[\sum_{t=0}^{T-1}\gamma^t r_t\right].
+\label{eq:mdp_reward}
+\end{equation}
+This cooperative reward makes routing, computation, and flight agents reduce
+the same normalized congestion, deadline, and energy score rather than
+optimizing incompatible local objectives.
+
+\subsection{Lyapunov Drift-Plus-Penalty Transformation}
+\subsubsection{Virtual Energy Deficit Queues}
+For UAV energy accounting, introduce the virtual deficit update
+\begin{equation}
+Z_k(t+1)=\bigl[Z_k(t)+E_k(t)-H_k(t)-\bar e_k\bigr]^+.
+\label{eq:virtual}
+\end{equation}
+Starting from a finite $Z_k$, mean-rate stability implies the average net-energy condition. To see this, sum the following inequality across slots:
+\[
+Z_k(t+1)-Z_k(t)\ge E_k(t)-H_k(t)-\bar e_k.
+\]
+The deficit tracks an accounting constraint; physical charge continues to obey Eq.~\eqref{eq:battery}.
+
+\subsubsection{Drift Bound and Per-Slot Objective}
+Normalize workload and energy using fixed scales $Q_*>0$ and $E_*>0$. The normalized backlogs and their slot increments are
+\[
+\begin{aligned}
+q_j&=Q_j/Q_*, & z_k&=Z_k/E_*,\\
+y_j&=(A_j-S_j)/Q_*, &
+e_k&=(E_k-H_k-\bar e_k)/E_*.
+\end{aligned}
+\]
+The quadratic Lyapunov function measures the combined backlog:
+\[
+\mathcal L(t)=\frac12\sum_j q_j(t)^2
+             +\frac12\sum_k z_k(t)^2.
+\]
+Its conditional one-slot change is
+\[
+\mathcal D(t)=\mathbb E\!\left[
+ \mathcal L(t+1)-\mathcal L(t)\mid s_t\right].
+\]
+Combining Eq.~\eqref{eq:queue} with the squared positive-part inequality gives the drift-plus-penalty bound
+\begin{equation}
+\begin{aligned}
+\mathcal D(t)+V\mathbb E[C(t)\mid s_t]
+ &\le D_0+\mathbb E[G(t)\mid s_t].
+\end{aligned}
+\label{eq:drift}
+\end{equation}
+Here the action-dependent score is
+\[
+\begin{aligned}
+G(t)={}&VC(t)+\sum_j q_j(t)y_j(t)\\
+       &+\sum_k z_k(t)e_k(t).
+\end{aligned}
+\]
+The constant $D_0$ is finite and independent of the selected action, upper-bounding half the conditional sum of squared increments. Uniformly bounded arrivals and service are sufficient, as is a suitable uniform second-moment bound. Here, limits on tasks, chunks, per-slot arrivals, radio/CPU service, harvest, and energy changes provide the required bounds. An unrestricted arrival model would need its own moment justification.
+
+An ideal controller would solve the following problem each slot:
+\begin{equation}
+\min_{\boldsymbol\alpha\in\mathcal F(s_t)}
+ \mathbb E[G(t)\mid s_t,\boldsymbol\alpha].
+\label{eq:slot_problem}
+\end{equation}
+Moving $x$ equivalent cycles from queue $a$ into queue $b$ contributes $(q_b-q_a)x/Q_*$ to the linear drift term. This accounts for congestion at both stages: uploading to an already overloaded server relocates work but does not complete it. External arrivals independent of the action can be removed from candidate comparisons. Before execution, scoring uses expected end-of-slot harvest; subsequent queue updates use the realized amount. Exogenous harvest that is independent of the current action adds the same term to each candidate score.
+
+The weight $V>0$ sets the emphasis on cost relative to backlog. Its normalization differs from the tuning coefficient in Q-TOP. Since $N(t)$ in Eq.~\eqref{eq:cost} is determined at the start of the slot, the current occupancy term has equal value for all candidate actions. Service-dependent drift and later rewards provide the action-sensitive delay incentive.
+
+\subsection{Hybrid R-MADDPG Decision Engine}
+\subsubsection{State, Actor Roles, and Shared Reward}
+State $s_t$ records node positions and velocities, radio/CPU availability, task and chunk stages, residual workload, ages and deadlines, physical batteries, virtual queues, and node activity. It also contains sufficient information about the exogenous mobility and harvesting processes. When those processes are partially observed, the controller needs observation history or a recurrent encoder; the listed instantaneous features alone need not form a Markov state.
+
+Agents are grouped into roles $\mathcal A=\mathcal V\cup\mathcal R\cup\mathcal U$, sharing actor weights within each role. Vehicle inputs contain the task list, ingress/local backlogs, position, estimated channels, and advertised summaries from visible edge nodes. The vehicle decides whether to hold or dispatch, where to send the task, and how to split UAV-bound work. RSU actors allocate task shares under the configured fixed RSU clock. UAV actors additionally observe battery charge, $Z_k$, nearby positions, and channels to select CPU frequency, task shares, and flight. Fixed local/cloud service rules and the common bandwidth scheduler supply the remaining execution decisions.
+
+For agent $h$ in role $g$, let $\boldsymbol x_{hi}$ be the feature vector of
+visible task slot $i$ and let $m_{hi}\in\{0,1\}$ mark a real rather than
+padded task.  The implemented two-layer task encoder and masked mean pooling
+are
+\begin{equation}
+\begin{aligned}
+\boldsymbol e_{hi}&=\phi_g(\boldsymbol x_{hi})
+=\operatorname{ReLU}\!\left(W_{g2}
+ \operatorname{ReLU}(W_{g1}\boldsymbol x_{hi}+\boldsymbol b_{g1})
+ +\boldsymbol b_{g2}\right),\\
+\overline{\boldsymbol e}_h&=
+\frac{\sum_{i=1}^{M_{\mathrm{task}}}m_{hi}\boldsymbol e_{hi}}
+{\max\{1,\sum_{i=1}^{M_{\mathrm{task}}}m_{hi}\}}.
+\end{aligned}
+\label{eq:task_encoder}
+\end{equation}
+The role-shared actor trunk then forms
+\begin{equation}
+\begin{aligned}
+\boldsymbol z_h&=\operatorname{LN}\!\left(
+\operatorname{ReLU}\!\left(W_{g4}
+\operatorname{ReLU}\!\left(W_{g3}
+[\boldsymbol o_h;\overline{\boldsymbol e}_h]+\boldsymbol b_{g3}\right)
++\boldsymbol b_{g4}\right)\right),\\
+\widehat{\boldsymbol a}_h&=\mathcal H_g(\boldsymbol z_h;\theta_g),
+\qquad h\in\mathcal A_g,
+\end{aligned}
+\label{eq:role_actor}
+\end{equation}
+where $\mathcal H_g$ denotes the role-specific output heads described below.
+All agents in $\mathcal A_g$ use the same parameters $\theta_g$.  During
+centralized training, one critic per role evaluates the complete state and
+flattened joint action:
+\begin{equation}
+\mathcal Q_{\psi_g}(s_t,\boldsymbol\alpha_t)
+=q_{\psi_g}\!\left([s_t;\operatorname{vec}(\boldsymbol\alpha_t)]\right).
+\label{eq:central_critic}
+\end{equation}
+Masks therefore handle changing active task and destination sets up to their
+configured limits.  Work omitted from an actor's visible list stays in
+physical storage and enters aggregate workload summaries.
+
+A common reward $r_t=-G(t)$ is delivered to every agent. The reward uses the same normalization, event rules, and actual executed service across meta-tasks, without additional completion bonuses or safety-only reward terms. Task occupancy, deadline outcomes, and energy expenditure are also recorded individually for evaluation.
+
+\subsubsection{Hybrid Action Representation}
+For a vehicle decision, let $l_{hd}$ be the logit for destination $d$ and
+$c_{hd}\in\{0,1\}$ its feasibility mask.  Invalid choices receive
+$-\infty$ before the temperature-$\tau_G$ Gumbel-softmax relaxation:
+\begin{equation}
+\begin{aligned}
+\widetilde l_{hd}&=
+\begin{cases}l_{hd},&c_{hd}=1,\\-\infty,&c_{hd}=0,\end{cases}\\
+q_{hd}&=(\widetilde l_{hd}+g_{hd})/\tau_G,
+\qquad g_{hd}=-\log[-\log u_{hd}],\\
+y_{hd}&=\frac{\exp(q_{hd})}{\sum_{d'}\exp(q_{hd'})},
+\qquad u_{hd}\sim\mathcal U(0,1),\\
+\boldsymbol x_h^{\mathrm{hard}}
+&=\operatorname{onehot}(\arg\max_d y_{hd}),\\
+\widehat{\boldsymbol x}_h^{\mathrm{cat}}
+&=\operatorname{sg}(\boldsymbol x_h^{\mathrm{hard}}
+-\boldsymbol y_h)+\boldsymbol y_h.
+\end{aligned}
+\label{eq:gumbel_action}
+\end{equation}
+The forward value is one-hot, whereas its backward derivative is that of
+$\boldsymbol y_h$.  At evaluation, Gumbel noise is removed and masked argmax
+with deterministic tie resolution is used.
+
+The continuous and simplex-constrained heads are
+\begin{equation}
+\begin{aligned}
+\rho_i&=\operatorname{sigmoid}(z_i^{\rho}),&
+f_k&=f_k^{\max}\operatorname{sigmoid}(z_k^f),\\
+\widehat{\boldsymbol u}_k&=
+\boldsymbol S_k\tanh(\boldsymbol z_k^u),&
+w_{hi}&=\frac{m_{hi}\exp(z_{hi}^w)}
+{\sum_{j}m_{hj}\exp(z_{hj}^w)},
+\end{aligned}
+\label{eq:continuous_heads}
+\end{equation}
+where $\boldsymbol S_k$ maps normalized motion components to the configured
+horizontal and vertical limits; if no task is visible, all $w_{hi}$ are set
+to zero.  Thus $0\le\rho_i\le1$, $0\le f_k\le f_k^{\max}$,
+$w_{hi}\ge0$, and $\sum_iw_{hi}=1$ whenever at least one task is eligible.
+Exploration adds bounded continuous noise and may replace a categorical choice
+by a uniformly sampled feasible choice before physical repair.
+
+This action treatment extends MADDPG to a hybrid decision space. Its categorical straight-through gradient is biased, so evaluation should include a hybrid-policy comparator.
+
+\subsubsection{Feasibility Controller and Action Repair}
+Joint policy proposals $\widehat{\boldsymbol\alpha}_t$ pass through a state-dependent controller.  Let $\mathcal C(s_t,\widehat{\boldsymbol\alpha}_t)$ be the finite set containing the proposal, scaled admissible motions, and verified contingencies.  The implemented selection can be written as
+\begin{equation}
+\begin{aligned}
+\boldsymbol\alpha_t
+&=\mathscr P_{s_t}(\widehat{\boldsymbol\alpha}_t)\\
+&\in\arg\min_{\boldsymbol a\in
+\mathcal C(s_t,\widehat{\boldsymbol\alpha}_t)\cap\mathcal F(s_t)}
+D(\boldsymbol a,\widehat{\boldsymbol\alpha}_t),\\
+\mathcal F(s_t)&=\mathcal F_{\mathrm{route}}\cap
+\mathcal F_{\mathrm{radio}}\cap\mathcal F_{\mathrm{cpu}}\cap
+\mathcal F_{\mathrm{flight}}\cap\mathcal F_{\mathrm{energy}},
+\end{aligned}
+\label{eq:feasibility_projection}
+\end{equation}
+where $D$ combines categorical disagreement with normalized Euclidean
+distance between continuous coordinates.  The five feasible-set factors
+respectively enforce Eq.~\eqref{eq:destination}, Eqs.~\eqref{eq:ofdma}--
+\eqref{eq:radio_capacity}, Eq.~\eqref{eq:cpu_capacity},
+Eqs.~\eqref{eq:flight_bounds}--\eqref{eq:collision}, and
+Eqs.~\eqref{eq:battery}--\eqref{eq:reserve}.  Before execution, the controller
+masks ineligible routes, normalizes CPU/bandwidth allocations, and checks
+flight, expenditure, and reserve requirements. Fixed task and node IDs
+resolve ties. An upload interrupted by lost contact has zero current service
+and retains its backlog.
+
+Motion repair considers a finite joint candidate search, ranking choices by deviation from the proposal. Candidates include the requested trajectory, scaled admissible motions, and verified contingencies. The selected combination must meet separation, speed, acceleration, map, and energy constraints along the relevant segments. Normal-service choices satisfy Eq.~\eqref{eq:reserve}. If none is valid, new service is disabled and a verified contingency satisfying $E_k\le B_k$ is selected. An empty viable set is recorded as a physical feasibility failure. Candidate resolution and search effort are logged.
+
+When processing and backhaul expenditure exceed the energy available for normal service, those allocations are reduced. The repaired action determines recomputed service, energy expenditure, and queue increments. Every baseline uses this same feasibility controller. Proposal deviations and correction frequencies are retained to measure the controller's contribution to executed behavior.
+
+\subsubsection{Inner Hybrid MADDPG Updates}
+For role $g$, the centralized value model is $\mathcal Q_{\psi_g}(s,\boldsymbol\alpha)$, and every agent $h\in\mathcal A_g$ uses the shared actor $\mu_{\theta_g}$. Each meta-task has replay records containing current/next states and role observations, proposed/executed joint actions, reward, and a done flag $d_t$. The current implementation sets $d_t=1$ for either termination or time-limit truncation, so neither case bootstraps. Target actors produce deterministic next-state proposals; a tensor-level repair $\mathscr H$ applies categorical masks, bounds continuous coordinates, and renormalizes processor shares before the critic target. The full physical feasibility controller is applied when actions are executed in the environment and those executed actions are stored in replay. For sample $b$, the role target and critic loss are
+\begin{align}
+y_{gb}&=r_b+\gamma(1-d_b)
+ \mathcal Q_{\psi_g^-}(s_b',\mathscr H(\boldsymbol\alpha_b')),\\
+\mathcal E_g&=\frac1{B}\sum_{b=1}^{B}
+ \bigl(\mathcal Q_{\psi_g}(s_b,\boldsymbol\alpha_b^{\mathrm{exec}})-y_{gb}\bigr)^2.
+\label{eq:critic}
+\end{align}
+The minibatch contains $B$ samples and uses discount $\gamma\in[0,1)$. Critic regression evaluates the action actually executed in the environment.
+
+For policy learning, replace role $g$'s replay actions with its current proposals and retain the detached executed replay actions of the other roles. Denote this mixed joint action by $\widetilde{\boldsymbol\alpha}_b^{(g)}$. The shared role actor maximizes
+\begin{equation}
+\begin{aligned}
+J_g={}&\mathbb E_b[\mathcal Q_{\psi_g}(s_b,
+ \widetilde{\boldsymbol\alpha}_b^{(g)})]\\
+&-\lambda_{\mathrm{rep}}\mathbb E_b
+ \|\widehat{\boldsymbol\alpha}_{gb}
+ -\operatorname{sg}(\boldsymbol\alpha_{gb}^{\mathrm{exec}})\|^2.
+\end{aligned}
+\label{eq:actor}
+\end{equation}
+The operator $\operatorname{sg}$ detaches the replay action from differentiation. The correction distance is measured using normalized continuous coordinates and categorical one-hot vectors. Thus the physical controller is not differentiated through: the straight-through Gumbel relaxation supplies the categorical policy gradient, while the repair penalty teaches the actor to remain close to actions that were actually feasible and executed.
+
+A role-shared actor takes one optimizer step after aggregating gradients from its active agents. After the critic and actor Adam steps, the target parameters follow
+\begin{equation}
+\theta_g^-\leftarrow(1-\tau_p)\theta_g^-+\tau_p\theta_g,\qquad
+\psi_g^-\leftarrow(1-\tau_p)\psi_g^-+\tau_p\psi_g.
+\label{eq:polyak}
+\end{equation}
+The Polyak coefficient $\tau_p$ is separate from the Gumbel-softmax
+temperature $\tau_G$. Training records critic error, repair loss, and
+gradient diagnostics for the categorical and continuous heads.
+
+\subsection{Outer Reptile Meta-Learning}
+A sampled meta-task $\omega\sim p_{\mathrm{train}}$ describes an operating scenario: traffic and workload statistics, channels, node capacities, harvesting, and initial state. Vehicle jobs remain separate from this scenario-level notion. Online role-actor and critic parameters are collected in $\Theta$. For $M$ sampled scenarios, each inner learner starts from the same $\Theta$ and takes $K$ updates, producing $\Theta_m'$. The Reptile step is
+\begin{equation}
+\Theta\leftarrow\Theta+\epsilon\frac1M
+ \sum_{m=1}^{M}(\Theta_m'-\Theta).
+\label{eq:reptile}
+\end{equation}
+Replay is isolated between meta-tasks, and each inner run resets optimizer moments without including them in the outer average. Target weights are synchronized with the copied online parameters at initialization, updated during inner training, and synchronized again after the outer step. Scenario sets for training, validation, and testing are disjoint. The initial experiments retain a fixed fleet topology. Transfer across node counts requires suitable masked critic encoders or explicitly supported topology-specific models.
+
+Deployment begins from the learned initialization and adapts within declared interaction and gradient-update budgets. Workloads, task ages, UAV positions, and batteries survive changes in operating conditions. Thus adaptation continues from the real network state. Initial experiments specify change points in advance. Detecting unannounced changes requires a separate detector or an explicit adaptation schedule; Reptile supplies parameter initialization.
+
+\subsection{Offline Meta-Training and Online Adaptation Phases}
+\subsubsection{Offline Meta-Training Phase}
+Training alternates between scenario-specific MADDPG adaptation and a
+cross-scenario Reptile update.  At each meta-epoch, $M$ training scenarios
+are sampled without using validation or test traces.  A frozen fork of the
+common initialization first collects a complete scenario episode.  Its
+transitions are then loaded into an isolated replay buffer, from which a fresh
+fork performs at most $K$ actor--critic updates.  After all scenarios have
+adapted independently from the same start, Eq.~\eqref{eq:reptile} moves the
+common actor and critic parameters toward their mean adapted values.  Adam
+moments are reset and target networks are synchronized at the outer boundary.
+The resulting procedure is off-policy within each scenario but first-order in
+the outer loop; it does not backpropagate through the $K$ inner updates.
+Algorithm~\ref{alg:meta} states this implemented training order.
+
+\begin{algorithm}[!htbp]
+\footnotesize
+\caption{Meta-training of queue-aware hybrid R-MADDPG}
+\label{alg:meta}
+\KwIn{Training distribution $p_{\mathrm{train}}$, $M$, $K$, interaction budget, $\epsilon$, $V$}
+\KwOut{Meta-initialization $\Theta$}
+Create role actors and centralized critics with parameters $\Theta$\;
+\For{each meta-training iteration}{
+ Cache the common start $\Theta_0\gets\Theta$\;
+ \For{$m=1,\ldots,M$}{
+  Draw $\omega_m$; fork $\Theta_0$ and set up its environment\;
+  Align targets and clear its optimizer moments and replay\;
+  \While{the scenario episode continues}{
+   Read global/local observations and generate hybrid proposals\;
+   Repair with $\mathscr P_{s_t}$; carry out admissible service and flight\;
+   Commit transferred/new work and harvest; update Eqs.~\eqref{eq:queue}, \eqref{eq:battery}, \eqref{eq:virtual}\;
+   Log events and $r_t=-G(t)$; append the transition to replay\;
+  }
+  Restore a fresh learner at $\Theta_0$ and load this scenario replay\;
+  \If{replay contains fewer than $B$ transitions}{
+   Flag an inner-update shortfall and continue\;
+  }
+  \For{$k=1,\ldots,K$}{
+   Sample a minibatch; update all critics and role actors\;
+   Clip gradients and apply Polyak target updates\;
+  }
+  Retain $\Theta_m'$; flag a shortfall if the run did not reach $K$ updates\;
+ }
+ Update through Eq.~\eqref{eq:reptile} from the shared $\Theta_0$\;
+ Align targets and evaluate held-out operating scenarios\;
+}
+\end{algorithm}
+
+\subsubsection{Execution Order}
+A slot begins with observation and policy proposals, followed by feasibility validation. Radio, CPU, and flight operations then use the currently eligible work and state. At the next boundary, the simulator commits transfers, adds arrivals and harvested energy, and logs task completions and deadline crossings. Reward uses realized service with the queue weights from the slot's beginning. Stored transitions support adaptation without retrospectively altering network events or physical state.
+
+\subsubsection{Online Deployment and Bounded Adaptation Phase}
+Deployment uses only role-local actors for action generation; centralized
+critics are needed only when a permitted adaptation update is performed.  A
+declared change point opens a bounded update budget.  Replay collected from
+the continuing mission is used to update parameters while the environment is
+held fixed: queues, task ages, UAV positions, batteries, and the slot clock
+are neither reset nor advanced by a gradient step.  When the budget is
+exhausted, inference continues with the latest adapted actors.  This separates
+adaptation cost from ordinary slot execution and makes the interaction and
+gradient budgets reportable.
+
+\begin{algorithm}[!htbp]
+\footnotesize
+\caption{Online deployment and bounded-budget adaptation}
+\label{alg:online}
+\KwIn{Meta-initialization $\Theta$, interaction/update budgets, $V$}
+\KwOut{Admissible slot decisions and updated learner parameters}
+Restore $\Theta$; align target weights and create deployment replay\;
+Carry forward current workloads, positions, and battery charge\;
+\While{the mission continues}{
+ Read state, local observations, and advertised node summaries\;
+ Generate hybrid actions and repair them with $\mathscr P_{s_t}$\;
+ Flag infeasibility when no admissible contingency is available\;
+ Carry out transmission, processing, and validated UAV flight\;
+ Commit new/transferred work; advance physical and virtual energy states\;
+ Log completion/deadline events, $r_t=-G(t)$, and the transition\;
+ \If{an adaptation step is due and budgets are available}{
+  Train actors/critics on deployment replay and refresh targets\;
+ }
+ Move to the next slot, retaining workloads and energy states\;
+}
+\end{algorithm}
+
+\subsubsection{Scope of Guarantees}
+An executed action is physically feasible only if the controller locates a valid choice within an accurately modeled viable set. The Lyapunov argument applies to the ideal optimizer of Eq.~\eqref{eq:slot_problem}, or to an approximation with an appropriate error bound. Extending its backlog and cost trade-offs to the learned controller would require stabilizable arrivals, sufficient slack and moment conditions, and bounded per-slot optimization error. Discounted hybrid actor-critic updates with biased gradient surrogates do not prove these conditions. Stability and adaptation performance are therefore evaluation questions, and infeasible or overloaded scenarios must be reported.
+
+\subsection{Computational and Storage Complexity Analysis}
+Let $\mathcal G$ contain the $G$ agent roles, with $n_g$ agents, local
+observation width $d_g$, and action width $a_g$ for role $g$.  Let
+$M_{\mathrm{task}}$ be the maximum visible tasks per agent, $d_{\mathrm t}$
+the per-task feature width, $h_{\mathrm a}$ the actor hidden width,
+$h_{\mathrm c}$ the critic hidden width, $d_s$ the global state width, and
+$d_A=\sum_g n_ga_g$ the joint action width.  Counting dense multiply--add
+operations, one joint actor pass has order
+\begin{equation}
+\begin{aligned}
+\mathcal C_{\mu}=\mathcal O\!\Bigg(
+\sum_{g\in\mathcal G}n_g\Big[&
+M_{\mathrm{task}}(d_{\mathrm t}h_{\mathrm a}+h_{\mathrm a}^2)\\[-0.3ex]
+&+(d_g+h_{\mathrm a})h_{\mathrm a}
++h_{\mathrm a}^2+h_{\mathrm a}a_g\Big]\Bigg).
+\end{aligned}
+\label{eq:actor_complexity}
+\end{equation}
+The first term is the masked task-set encoder, the next terms are the shared
+actor trunk, and the last term represents the hybrid output heads.  With one
+two-hidden-layer centralized critic per role, a joint critic pass costs
+\begin{equation}
+\mathcal C_Q=\mathcal O\!\left(
+G\left[(d_s+d_A)h_{\mathrm c}+h_{\mathrm c}^2+h_{\mathrm c}\right]
+\right).
+\label{eq:critic_complexity}
+\end{equation}
+Backpropagation has the same asymptotic order as its forward pass.  Hence one
+MADDPG update on a minibatch of $B$ transitions is
+$\mathcal O(B(\mathcal C_{\mu}+\mathcal C_Q))$ up to constant factors for
+online and target evaluations.  Gradient clipping and Polyak averaging are
+linear in the number of trainable parameters $P_{\Theta}$.
+
+For $M$ meta-training scenarios, $K$ inner updates, and $T_m$ collected slots
+per scenario, one Reptile meta-epoch has order
+\begin{equation}
+\mathcal O\!\left(
+\sum_{m=1}^{M}T_m(\mathcal C_{\mu}+\mathcal C_{\mathrm{env}})
++MKB(\mathcal C_{\mu}+\mathcal C_Q)+MP_{\Theta}\right),
+\label{eq:meta_complexity}
+\end{equation}
+where $\mathcal C_{\mathrm{env}}$ covers queue service, channel, energy, and
+feasibility calculations.  If motion repair evaluates $K_{\mathrm{rep}}$
+joint candidates at cost $\mathcal C_{\mathrm{feas}}$ each, its worst-case
+contribution is
+$\mathcal C_{\mathrm{rep}}=\mathcal O(K_{\mathrm{rep}}
+\mathcal C_{\mathrm{feas}})$.  Decentralized inference does not evaluate a
+critic and therefore costs
+$\mathcal O(\mathcal C_{\mu}+\mathcal C_{\mathrm{rep}})$ per slot.
+
+Let $C_{\mathrm{replay}}$ be replay capacity and $d_{\mathrm{tr}}$ the stored
+transition width, including current/next global and local observations, task
+features and masks, proposed/executed joint actions, rewards, and the done
+flag.  Replay storage is $\mathcal O(C_{\mathrm{replay}}d_{\mathrm{tr}})$;
+network, target-network, gradient, and Adam state storage is
+$\mathcal O(P_{\Theta})$.  These expressions describe scaling only.  The
+evaluation therefore also reports measured decision latency, adaptation time,
+and peak memory rather than inferring practical speed from asymptotic order
+alone.
+
+\section{Evaluation Protocol and Current Evidence}
 \label{results}
 
 \subsection{Benchmark Comparisons}
-\begin{itemize}
-    \item \textit{algo1} \cite{}: descr1.
-    \item \textit{algo2} \cite{}: descr2.
-    \item \textit{algo3} \cite{}: descr3.
-    \item \textit{algo4} \cite{}: descr4.
-    \item \textit{algo5} \cite{}: descr5.
-    \item \textit{algo6} \cite{}: descr6.
-\end{itemize}
+The common evaluator is configured for nine controllers: local-only;
+nearest-feasible edge; queue-and-energy-aware greedy; a fixed-budget genetic
+drift optimizer adapted from Q-TOP~\cite{sun2026qtop}; hybrid MADDPG without
+meta-learning; domain-randomized hybrid MADDPG; the proposed queue-aware
+R-MADDPG; an R-MADDPG ablation without physical-queue weighting; and an
+independent hybrid MAPPO comparison based on PPO~\cite{schulman2017proximal}.
+Every method receives the same traffic, channel, mobility, and harvest trace
+and passes through the same feasibility controller.  This separates policy
+quality from the protection supplied by action repair.
 
+\subsection{Scenarios, Metrics, and Statistical Unit}
+The preregistered suites cover low load, near-capacity load, overload,
+zero harvest, harvest outage, backhaul bottleneck, and a traffic surge.
+Synthetic road routes support controlled stress tests, while recorded SUMO
+traces support real-road mobility.  Training, validation, and test manifests
+are disjoint.  Checkpoint selection uses validation reward and rejects
+safety-infeasible candidates; the sealed test split is not used for selection.
 
+The reportable outcomes are mean, 95th-percentile, and 99th-percentile
+response time; deadline success; throughput; per-stage backlog and backlog
+growth; unfinished and censored tasks; propulsion, computation,
+communication, and total energy; minimum battery; virtual deficit; landing
+time; repair rate; and physical violations.  Finite traces are drained without
+new arrivals or unfinished work is reported as censored.  Confidence
+intervals are computed across independent learner seeds after averaging the
+paired test scenarios for each seed; scenario repetitions alone are not
+treated as independent trained policies.
 
+\subsection{Evidence Available at This Draft Stage}
+The simulator, nine-controller interface, scenario generator, paired-seed
+runner, uncertainty aggregation, checkpoint selection, resumable training,
+and trace/configuration hashing are implemented.  Integration pilots have
+exercised the entire pipeline, including a 63-run smoke bundle spanning all
+nine controllers and seven scenario classes without a recorded physical,
+battery, or separation violation.  This establishes software integration and
+constraint enforcement only; it is not evidence of convergence or algorithm
+ranking.
 
+Research-scale, independent-seed training of the learned methods and the
+resulting final tables, learning curves, adaptation curves, ablations, and
+failure analysis remain pending.  Consequently, this draft makes no claim
+that R-MADDPG outperforms a baseline, stabilizes every load, or adapts faster
+in the final benchmark.  Those claims may be added only after the frozen
+research plan produces auditable checkpoints and result bundles.
+
+\newpage
 \section{Conclusion}
 \label{conclusion}
+This report defines a queue-aware, energy-constrained vehicular edge-cloud
+system controlled by hybrid R-MADDPG.  Unlike a one-step offloading model, the
+formulation follows each task through ingress, radio upload, staging,
+computation, UAV backhaul, cloud execution, and branch synchronization.  It
+also specifies vehicle motion, channel gain, OFDMA sharing, three-dimensional
+UAV kinematics, propulsion and service energy, stochastic replenishment,
+battery evolution, collision avoidance, and a verified landing reserve.
 
+The implementation currently provides the task-persistent simulator,
+feasibility layer, non-learning baselines, hybrid MADDPG/Reptile learner,
+hybrid MAPPO comparison, reproducible trainers, and common evaluation
+pipeline.  The remaining scientific work is to execute the frozen
+research-scale multi-seed study, analyze both successful and overloaded
+cases, and replace the present evidence-status subsection with numerical
+tables and figures.  Until that step is complete, the main contribution is a
+fully specified and testable methodology rather than a demonstrated
+performance advantage.
+% Balance the final reference page across both IEEE columns.
+\IEEEtriggeratref{7}
+\begin{thebibliography}{99}
+\bibitem{zhang2019mobile}
+J. Zhang, L. Zhou, Q. Tang, E. C.-H. Ngai, X. Hu, H. Zhao, and J. Wei,
+``Stochastic computation offloading and trajectory scheduling for UAV-assisted mobile edge computing,''
+\emph{IEEE Internet of Things Journal}, vol. 6, no. 2, pp. 3688--3699,
+2019, doi: 10.1109/JIOT.2018.2890133.
 
-\bibliographystyle{IEEEtran}
-\bibliography{ref.bib}
+\bibitem{liu2020uav}
+Y. Liu, K. Xiong, Q. Ni, P. Fan, and K. B. Letaief,
+``UAV-assisted wireless powered cooperative mobile edge computing: Joint offloading, CPU control, and trajectory optimization,''
+\emph{IEEE Internet of Things Journal}, vol. 7, no. 4, pp. 2777--2790,
+2020, doi: 10.1109/JIOT.2019.2958975.
+
+\bibitem{lowe2017multi}
+R. Lowe, Y. Wu, A. Tamar, J. Harb, P. Abbeel, and I. Mordatch,
+``Multi-agent actor-critic for mixed cooperative-competitive environments,''
+in \emph{Advances in Neural Information Processing Systems}, 2017.
+
+\bibitem{schulman2017proximal}
+J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov,
+``Proximal policy optimization algorithms,'' arXiv:1707.06347, 2017.
+
+\bibitem{finn2017model}
+C. Finn, P. Abbeel, and S. Levine,
+``Model-agnostic meta-learning for fast adaptation of deep networks,''
+in \emph{Proceedings of the 34th International Conference on Machine Learning},
+vol. 70, pp. 1126--1135, 2017.
+
+\bibitem{nichol2018reptile}
+A. Nichol, J. Achiam, and J. Schulman,
+``On first-order meta-learning algorithms,'' arXiv:1803.02999, 2018.
+
+\bibitem{neely2010stochastic}
+M. J. Neely, \emph{Stochastic Network Optimization with Application to Communication and Queueing Systems}.
+Morgan \& Claypool, 2010, doi: 10.2200/S00271ED1V01Y201006CNT007.
+
+\bibitem{mao2017dynamic}
+Y. Mao, J. Zhang, and K. B. Letaief,
+``Dynamic computation offloading for mobile-edge computing with energy harvesting devices,''
+\emph{IEEE Journal on Selected Areas in Communications}, vol. 34, no. 12,
+pp. 3590--3605, Dec. 2016, doi: 10.1109/JSAC.2016.2611964.
+
+\bibitem{yan2026rmaddpg}
+M. Yan, P. Yu, J. Chen, C. Li, and C.-L. I,
+``Dynamic computation offloading optimization based on meta-reinforcement learning in UAV-assisted MEC networks,''
+\emph{IEEE Internet of Things Journal}, vol. 13, no. 11,
+pp. 23615--23627, Jun. 2026, doi: 10.1109/JIOT.2026.3670318.
+
+\bibitem{sun2026qtop}
+H. Sun, H. Chen, H. Xue, L. Wu, Z. Li, N. Chen, W. Liu, and J. Yu,
+``Q-TOP: Queue-aware task offloading and path planning for multi-UAV assisted vehicular edge computing networks,''
+\emph{IEEE Transactions on Vehicular Technology}, accepted manuscript,
+2026, doi: 10.1109/TVT.2026.3721145.
+
+\bibitem{talukdar2026bamappo}
+N. Talukdar, T. Barai, A. Hazra, and N. Mazumdar,
+``MAPPO-driven task quality optimization with wireless energy transfer in
+multi-UAV MEC-enabled IoT networks,''
+\emph{IEEE Transactions on Sustainable Computing}, vol. 11, no. 3,
+pp. 302--316, May/Jun. 2026, doi: 10.1109/TSUSC.2026.3688744.
+
+\bibitem{zhang2020uav}
+Q. Zhang, M. Mozaffari, W. Saad, M. Bennis, and M. Debbah,
+``Machine learning for predictive on-demand deployment of UAVs for wireless communications,''
+arXiv:1805.00061, 2018.
+
+\bibitem{ye2021deep}
+H. Ye, G. Y. Li, and B.-H. Juang,
+``Deep reinforcement learning based resource allocation for V2V communications,''
+arXiv:1805.07222, 2018.
+
+\bibitem{park2019meta}
+J. Park, S. Samarakoon, M. Bennis, and M. Debbah,
+``Wireless network intelligence at the edge,''
+\emph{Proceedings of the IEEE}, vol. 107, no. 11, pp. 2204--2239, 2019.
+\end{thebibliography}
 
 \end{document}
 
