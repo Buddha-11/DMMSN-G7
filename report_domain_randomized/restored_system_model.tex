@@ -1,15 +1,15 @@
 \section{System Model}
 \label{system_model}
 
-This section develops the mathematical models governing every physical and
-computational stage of the vehicle--RSU--UAV--cloud architecture.
-Fig.~\ref{fig:network_slot} summarizes the physical architecture and causal
-slot order, while Fig.~\ref{fig:service_graph} expands the task-service path.
-The presentation proceeds
-from network topology and slot timing to vehicle mobility, task generation and
-offloading, wireless communication, computation and queueing, UAV motion, and
-energy consumption and replenishment. Section~\ref{problem_formulation} then
-consolidates these models into the long-term control problem.
+The vehicle--RSU--UAV--cloud network couples task service with communication,
+motion, and energy availability. We specify these components separately so
+that their interaction within a time slot is explicit.
+Fig.~\ref{fig:network_slot} introduces the topology and execution order;
+Fig.~\ref{fig:service_graph} follows a task through its service stages.
+The models below define mobility, arrivals, offloading, radio service,
+computation, queues, flight, and battery replenishment.
+Section~\ref{problem_formulation} uses these definitions to state the
+long-term control problem.
 
 \subsection{Network Architecture and Time-Slot Model}
 \label{subsec:network_model}
@@ -41,7 +41,13 @@ service no earlier than slot $t+1$.
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=0.96\textwidth]{network_and_slot_schematic.png}
+\includegraphics[width=0.94\textwidth]{Network architecture diagram.png}
+\par\vspace{2pt}
+{\footnotesize (a) Vehicle--RSU--UAV--cloud architecture.\par}
+\vspace{5pt}
+\includegraphics[width=0.96\textwidth]{Causal time-slot execution workflow.png}
+\par\vspace{2pt}
+{\footnotesize (b) Causal execution order within slot $t$.\par}
 \caption{System architecture and causal slot execution. UAVs provide mobile
 edge service, RSUs provide fixed edge capacity, and UAV-bound work may retain
 a finite cloud branch. Harvest and external arrivals are committed only after
@@ -51,33 +57,7 @@ current-slot service and expenditure.}
 
 \begin{figure*}[t]
 \centering
-\renewcommand{\arraystretch}{1.35}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{c c c c c c c}
-\fbox{\parbox{0.12\textwidth}{\centering Vehicle task\\arrival}}
-&$\longrightarrow$&
-\fbox{\parbox{0.12\textwidth}{\centering Ingress\\queue}}
-&$\longrightarrow$&
-\fbox{\parbox{0.12\textwidth}{\centering Local CPU}}
-&$\longrightarrow$&
-\fbox{\parbox{0.10\textwidth}{\centering Complete}}\\
-&&$\searrow$&&&&\\[-1.0ex]
-&&\fbox{\parbox{0.12\textwidth}{\centering V2R upload}}
-&$\longrightarrow$&
-\fbox{\parbox{0.12\textwidth}{\centering RSU CPU}}
-&$\longrightarrow$&
-\fbox{\parbox{0.10\textwidth}{\centering Complete}}\\
-&&$\searrow$&&&&\\[-1.0ex]
-&&\fbox{\parbox{0.12\textwidth}{\centering V2U upload}}
-&$\longrightarrow$&
-\fbox{\parbox{0.12\textwidth}{\centering UAV CPU}}
-&$\longrightarrow$&
-\fbox{\parbox{0.10\textwidth}{\centering Merge}}\\
-&&&&$\searrow$&&$\uparrow$\\[-1.0ex]
-&&&&\fbox{\parbox{0.12\textwidth}{\centering UAV--cloud\\backhaul}}
-&$\longrightarrow$&
-\fbox{\parbox{0.10\textwidth}{\centering Cloud CPU}}
-\end{tabular}
+\includegraphics[width=0.96\textwidth]{End-to-end task lifecycle and queue mode.png}
 \caption{End-to-end task service graph. Every box is represented by a
 persistent task or queue stage. Transfers committed at one boundary
 become eligible at the following boundary.}
@@ -208,9 +188,9 @@ T_i=f_i^{\mathrm{done}}-a_i,\qquad
 \delta_i=\mathbf 1\{T_i\le d_i\}.
 \label{eq:actual_latency}
 \end{equation}
-A first deadline crossing emits one miss event, but the task remains in
-the network. An unfinished task at the end of a finite trace is
-reported as censored rather than assigned an artificial latency.
+The simulator records a miss when a task first crosses its deadline and
+continues to track its remaining work. If the trace ends before completion,
+the task is reported as censored; no completion latency is imputed.
 
 \subsection{Communication and OFDMA Service Model}
 \subsubsection{Vehicle-to-RSU Terrestrial Channel Model}
@@ -282,8 +262,8 @@ A transfer of $s_{ih}^{\mathrm{tr}}$ equivalent cycles must obey
 \le\Delta R_h(t).
 \label{eq:radio_capacity}
 \end{equation}
-Loss of coverage gives zero current service; outstanding bits remain
-at their original upload queue.
+When coverage is lost, the link provides no service in that slot. Its
+untransmitted bits remain in the original upload queue.
 
 \subsection{Computation, Backhaul, and Queueing Model}
 \subsubsection{Persistent Multi-Stage Queue Model}
@@ -389,6 +369,22 @@ segments satisfying the same limits, terminating at a declared landing
 site with near-zero velocity.
 
 \subsection{UAV and Infrastructure Energy-Consumption Models}
+Fig.~\ref{fig:energy_safety_overview} summarizes the UAV energy ledger,
+replenishment paths, flight constraints, and the return-reserve rule. The
+laser-transfer branch is optional and is not active in the reported
+stochastic-harvesting benchmark.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.94\textwidth]{UAV energy, harvesting, and return-reserve model.png}
+\caption{UAV energy, harvesting, and return-reserve model. Physical battery
+charge supplies propulsion, computation, communication, and control energy;
+normal service is admitted only when current expenditure and a verified
+return or landing reserve remain feasible. The virtual deficit is an
+accounting queue rather than stored energy.}
+\label{fig:energy_safety_overview}
+\end{figure*}
+
 \subsubsection{Rotary-Wing Flight and Hovering-Energy Model}
 The propulsion ledger explicitly separates motion from hovering, following
 the energy-accounting organization in~\cite{talukdar2026mappo}. Let
@@ -555,22 +551,170 @@ reported latency is still computed from Eq.~\eqref{eq:actual_latency}.
 
 \subsection{Long-Term Stochastic Optimization Problem}
 Collect all dispatch, split, CPU, and motion decisions in
-$\boldsymbol\alpha(t)$. The long-run problem is
+$\boldsymbol\alpha(t)$. For compact notation, let
+$\mathcal D_i=\{L(i)\}\cup\mathcal R\cup\mathcal U$ be the candidate
+destinations of task $i$, and let $m_{in}(t)\in\{0,1\}$ indicate whether
+destination $n$ is available to that task in slot $t$. The mask is zero for
+an out-of-coverage link, a returning or landed UAV, or any destination that
+cannot pass the physical safety checks. The long-run problem is
 \begin{equation}
 \begin{aligned}
 \mathcal P:\quad \min_{\pi}\;&
 \limsup_{T\to\infty}\frac1T
-\sum_{t=0}^{T-1}\mathbb E_{\pi}[C(t)]\\
-\mathrm{s.t.}\;&
-\boldsymbol\alpha(t)\in\mathcal F(s_t),\quad
-\text{Eq.~\eqref{eq:stability}},\\
-&\limsup_{T\to\infty}\frac1T\sum_{t=0}^{T-1}
-\mathbb E_{\pi}[E_k(t)-H_k(t)]\le\bar e_k .
+\sum_{t=0}^{T-1}\mathbb E_{\pi}[C(t)].
 \end{aligned}
 \label{eq:problem}
 \end{equation}
-The feasible set $\mathcal F(s_t)$ contains routing masks, radio and
-CPU capacity, stage causality, motion and separation limits, immediate
-battery causality, and return reserve. Setting $\bar e_k=0$ requests
-long-run energy neutrality; $\bar e_k>0$ permits declared average
-battery draw during a finite mission.
+Unlike a formulation that hides feasibility inside one set symbol, the
+constraints used here are stated explicitly below. They must hold for every
+slot, task, applicable node, and UAV unless a different quantifier is shown.
+
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+h_i(t)+\sum_{n\in\mathcal D_i}x_{in}(t)=1,\\
+h_i(t),x_{in}(t)\in\{0,1\}
+\end{gathered}
+\tag{C1}\label{con:routing}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+x_{in}(t)\le m_{in}(t),\qquad n\in\mathcal D_i
+\tag{C2}\label{con:mask}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+0\le\rho_i(t)\le1,\qquad
+\rho_i(t)=1\ \text{if }\zeta_i=0
+\tag{C3}\label{con:split}
+\end{equation}
+Constraint (C1) allows exactly one of holding, local execution, RSU
+offloading, or UAV offloading. Constraint (C2) prevents dispatch through an
+unavailable link or unsafe UAV. Constraint (C3) permits a cloud split only
+for partitionable tasks; once dispatched, the selected destination and split
+remain fixed.
+
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+s_{ih}^{\mathrm{tr}}(t)\ge0,\qquad
+\sum_i\frac{s_{ih}^{\mathrm{tr}}(t)}{\chi_i}\le\Delta R_h(t),\\
+W_{ih}(t)\ge0,\qquad \sum_iW_{ih}(t)\le W_h^{\max}
+\end{gathered}
+\tag{C4}\label{con:radio}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+0\le f_n(t)\le f_n^{\max},\qquad w_{in}(t)\ge0,\\
+\sum_iw_{in}(t)\le1
+\end{gathered}
+\tag{C5}\label{con:processor}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+0\le s_{in}^{\mathrm{cpu}}(t)\le
+\min\{c_{in}^{\mathrm{elig}}(t),\Delta f_n(t)w_{in}(t)\}
+\tag{C6}\label{con:cpu-service}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+\sum_{i\in\mathcal B_k(t)}\frac{s_{ik}^{\mathrm{bh}}(t)}{\chi_i}
+\le\Delta R_k^{\mathrm{bh}},\\
+\sum_i s_{ic}^{\mathrm{cpu}}(t)\le\Delta f_c
+\end{gathered}
+\tag{C7}\label{con:backhaul-cloud}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+0\le S_j(t)\le Q_j(t),\\
+Q_j(t+1)=Q_j(t)-S_j(t)+A_j(t)
+\end{gathered}
+\tag{C8}\label{con:queue-causality}
+\end{equation}
+Constraints (C4)--(C8) impose spectrum, processor, backhaul, cloud, and
+queue-service limits. In particular, service cannot exceed work that is
+eligible at the start of the slot. Output transferred from an upstream stage
+is admitted to its downstream queue only at the next slot boundary, thereby
+preventing same-slot multi-stage execution.
+
+Let $\mathcal A$ denote the horizontal operating region. The UAV constraints
+are
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+\boldsymbol p_k(t+1)=\boldsymbol p_k(t)+\Delta\boldsymbol u_k(t),\\
+\boldsymbol p_k^{\mathrm H}(t+1)\in\mathcal A,\qquad
+z_k^{\min}\le z_k(t+1)\le z_k^{\max}
+\end{gathered}
+\tag{C9}\label{con:position}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+\|\boldsymbol u_k(t)\|\le v_k^{\max},\\
+-v_k^{\mathrm{down}}\le u_k^z(t)\le v_k^{\mathrm{up}}
+\end{gathered}
+\tag{C10}\label{con:speed}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\|\boldsymbol u_k(t)-\boldsymbol u_k(t-1)\|
+\le a_k^{\max}\Delta
+\tag{C11}\label{con:acceleration}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\begin{aligned}
+\min_{\tau\in[0,\Delta]}\|&\boldsymbol p_k(t)+\tau\boldsymbol u_k(t)\\
+&-\boldsymbol p_l(t)-\tau\boldsymbol u_l(t)\|
+\ge d_{\mathrm{safe}},\quad k\ne l
+\end{aligned}
+\tag{C12}\label{con:separation}
+\end{equation}
+Thus (C9)--(C12) enforce kinematics, the flight region, altitude, speed,
+climb/descent, acceleration, and continuous-path separation. The stopping
+distance needed to remain inside the region is included in the feasibility
+mask used by (C2), not checked only after motion is executed.
+
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+B_k^{\mathrm{pre}}(t+1)=B_k(t)-E_k(t),\\
+B_k(t+1)=\min\{B_k^{\max},B_k^{\mathrm{pre}}(t+1)+H_k(t)\},\\
+0\le B_k(t+1)\le B_k^{\max}
+\end{gathered}
+\tag{C13}\label{con:battery-dynamics}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\begin{gathered}
+0\le E_k(t)\le B_k(t),\\
+B_k^{\mathrm{pre}}(t+1)\ge B_k^{\mathrm{safe}}(t+1)
+\end{gathered}
+\tag{C14}\label{con:energy-reserve}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\limsup_{T\to\infty}\frac1T\sum_{t=0}^{T-1}
+\mathbb E_{\pi}[Q_j(t)]<\infty,\quad j\in\mathcal J
+\tag{C15}\label{con:queue-stability}
+\end{equation}
+\stepcounter{equation}
+\begin{equation}
+\limsup_{T\to\infty}\frac1T\sum_{t=0}^{T-1}
+\mathbb E_{\pi}[E_k(t)-H_k(t)]\le\bar e_k,\quad k\in\mathcal U
+\tag{C16}\label{con:average-energy}
+\end{equation}
+\stepcounter{equation}
+Constraints (C13) and (C14) enforce the implemented expenditure-before-
+harvest timing, battery capacity through the clipped update, immediate energy
+causality, and a verified return/landing reserve. Constraint (C15) is the
+strong-stability target for every physical queue. It is evaluated rather than
+assumed in deliberately overloaded tests. In (C16), $\bar e_k=0$ requests
+long-run energy neutrality, whereas $\bar e_k>0$ permits a declared average
+battery draw during a finite mission. Deadlines are represented in the cost
+through $M(t)$ instead of being imposed as an infeasible hard constraint;
+missed tasks remain in the physical queues until completion.

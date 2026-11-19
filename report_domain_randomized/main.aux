@@ -2,9 +2,15 @@
 \providecommand\hyper@newdestlabel[2]{}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{liu2020uav}
+\citation{liang2025rav}
+\citation{liu2020uav}
+\citation{talukdar2026mappo}
+\citation{tobin2017domain}
+\citation{peng2018sim}
 \providecommand \oddpage@label [2]{}
 \@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{1}{section.2}\protected@file@percent }
+\citation{lowe2017multi}
 \citation{liu2020uav}
 \citation{xiong2021energy}
 \citation{guo2024multi}
@@ -21,157 +27,203 @@
 \citation{yan2026rmaddpg}
 \citation{tobin2017domain}
 \citation{peng2018sim}
-\citation{liu2020uav}
-\citation{talukdar2026mappo}
-\citation{zhang2019predictive}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{2}{section.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}UAV-Assisted MEC and End-to-End Task Service}{2}{subsection.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Queue-Aware Vehicular Offloading and Lyapunov Control}{2}{subsection.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Multi-Agent and Hybrid-Action Reinforcement Learning}{2}{subsection.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Meta-Learning and Robustness Across Operating Domains}{2}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-E}}Energy-Aware Flight and Safe Execution}{2}{subsection.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-F}}Synthesis and Research Gap}{2}{subsection.2.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {III}System Model}{2}{section.3}\protected@file@percent }
-\newlabel{system_model}{{III}{2}{System Model}{section.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Network Architecture and Time-Slot Model}{2}{subsection.3.1}\protected@file@percent }
-\newlabel{subsec:network_model}{{\mbox  {III-A}}{2}{Network Architecture and Time-Slot Model}{subsection.3.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Positioning of the Proposed Framework Relative to the Main Research Streams}}{3}{table.caption.1}\protected@file@percent }
+\citation{liu2020uav}
+\citation{talukdar2026mappo}
+\citation{zhang2019predictive}
+\citation{liu2020uav}
+\citation{xiong2021energy}
+\citation{guo2024multi}
+\citation{neely2010stochastic}
+\citation{mao2017dynamic}
+\citation{sun2026qtop}
+\citation{lowe2017multi}
+\citation{schulman2017proximal}
+\citation{talukdar2026mappo}
+\citation{finn2017model}
+\citation{nichol2018reptile}
+\citation{yan2026rmaddpg}
+\citation{tobin2017domain}
+\citation{peng2018sim}
+\citation{liu2020uav}
+\citation{talukdar2026mappo}
+\citation{zhang2019predictive}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Meta-Learning and Robustness Across Operating Domains}{3}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-E}}Energy-Aware Flight and Safe Execution}{3}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-F}}Synthesis and Research Gap}{3}{subsection.2.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}System Model}{3}{section.3}\protected@file@percent }
+\newlabel{system_model}{{III}{3}{System Model}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Network Architecture and Time-Slot Model}{3}{subsection.3.1}\protected@file@percent }
+\newlabel{subsec:network_model}{{\mbox  {III-A}}{3}{Network Architecture and Time-Slot Model}{subsection.3.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Positioning of the Proposed Framework Relative to the Main Research Streams}}{4}{table.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:positioning}{{I}{3}{Positioning of the Proposed Framework Relative to the Main Research Streams}{table.caption.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Vehicle Mobility and Coverage Model}{3}{subsection.3.2}\protected@file@percent }
-\newlabel{eq:vehicle_motion}{{1}{3}{Vehicle Mobility and Coverage Model}{equation.1}{}}
-\newlabel{eq:distances}{{2}{3}{Vehicle Mobility and Coverage Model}{equation.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Task Generation, Lifecycle, and Offloading Model}{3}{subsection.3.3}\protected@file@percent }
-\newlabel{subsec:task_model}{{\mbox  {III-C}}{3}{Task Generation, Lifecycle, and Offloading Model}{subsection.3.3}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}1}Task Arrival and Persistent Record Model}{3}{subsubsection.3.3.1}\protected@file@percent }
-\newlabel{eq:task_arrival}{{3}{3}{Task Arrival and Persistent Record Model}{equation.3}{}}
-\newlabel{eq:task_record}{{4}{3}{Task Arrival and Persistent Record Model}{equation.4}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}2}Destination Selection and Partitioning Model}{3}{subsubsection.3.3.2}\protected@file@percent }
-\newlabel{eq:destination}{{5}{3}{Destination Selection and Partitioning Model}{equation.5}{}}
-\newlabel{eq:split}{{6}{3}{Destination Selection and Partitioning Model}{equation.6}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}3}End-to-End Completion and Delay Model}{3}{subsubsection.3.3.3}\protected@file@percent }
-\newlabel{eq:actual_latency}{{7}{3}{End-to-End Completion and Delay Model}{equation.7}{}}
+\newlabel{tab:positioning}{{I}{4}{Positioning of the Proposed Framework Relative to the Main Research Streams}{table.caption.1}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces System architecture and causal slot execution. UAVs provide mobile edge service, RSUs provide fixed edge capacity, and UAV-bound work may retain a finite cloud branch. Harvest and external arrivals are committed only after current-slot service and expenditure.}}{4}{figure.caption.2}\protected@file@percent }
 \newlabel{fig:network_slot}{{1}{4}{System architecture and causal slot execution. UAVs provide mobile edge service, RSUs provide fixed edge capacity, and UAV-bound work may retain a finite cloud branch. Harvest and external arrivals are committed only after current-slot service and expenditure}{figure.caption.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces End-to-end task service graph. Every box is represented by a persistent task or queue stage. Transfers committed at one boundary become eligible at the following boundary.}}{4}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:service_graph}{{2}{4}{End-to-end task service graph. Every box is represented by a persistent task or queue stage. Transfers committed at one boundary become eligible at the following boundary}{figure.caption.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Principal system notation.}}{4}{table.caption.4}\protected@file@percent }
-\newlabel{tab:notation}{{II}{4}{Principal system notation}{table.caption.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Communication and OFDMA Service Model}{4}{subsection.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}1}Vehicle-to-RSU Terrestrial Channel Model}{4}{subsubsection.3.4.1}\protected@file@percent }
-\newlabel{eq:rsu_gain}{{8}{4}{Vehicle-to-RSU Terrestrial Channel Model}{equation.8}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}2}Vehicle-to-UAV Air-to-Ground Channel Model}{4}{subsubsection.3.4.2}\protected@file@percent }
-\newlabel{eq:los}{{9}{4}{Vehicle-to-UAV Air-to-Ground Channel Model}{equation.9}{}}
-\newlabel{eq:uav_gain}{{10}{4}{Vehicle-to-UAV Air-to-Ground Channel Model}{equation.10}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}3}OFDMA Rate and Transmission-Service Model}{4}{subsubsection.3.4.3}\protected@file@percent }
-\newlabel{eq:rate}{{11}{4}{OFDMA Rate and Transmission-Service Model}{equation.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Vehicle Mobility and Coverage Model}{4}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:vehicle_motion}{{1}{4}{Vehicle Mobility and Coverage Model}{equation.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces End-to-end task service graph. Every box is represented by a persistent task or queue stage. Transfers committed at one boundary become eligible at the following boundary.}}{5}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:service_graph}{{2}{5}{End-to-end task service graph. Every box is represented by a persistent task or queue stage. Transfers committed at one boundary become eligible at the following boundary}{figure.caption.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Principal system notation.}}{5}{table.caption.4}\protected@file@percent }
+\newlabel{tab:notation}{{II}{5}{Principal system notation}{table.caption.4}{}}
+\newlabel{eq:distances}{{2}{5}{Vehicle Mobility and Coverage Model}{equation.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Task Generation, Lifecycle, and Offloading Model}{5}{subsection.3.3}\protected@file@percent }
+\newlabel{subsec:task_model}{{\mbox  {III-C}}{5}{Task Generation, Lifecycle, and Offloading Model}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}1}Task Arrival and Persistent Record Model}{5}{subsubsection.3.3.1}\protected@file@percent }
+\newlabel{eq:task_arrival}{{3}{5}{Task Arrival and Persistent Record Model}{equation.3}{}}
+\newlabel{eq:task_record}{{4}{5}{Task Arrival and Persistent Record Model}{equation.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}2}Destination Selection and Partitioning Model}{5}{subsubsection.3.3.2}\protected@file@percent }
+\newlabel{eq:destination}{{5}{5}{Destination Selection and Partitioning Model}{equation.5}{}}
+\newlabel{eq:split}{{6}{5}{Destination Selection and Partitioning Model}{equation.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}3}End-to-End Completion and Delay Model}{5}{subsubsection.3.3.3}\protected@file@percent }
+\newlabel{eq:actual_latency}{{7}{5}{End-to-End Completion and Delay Model}{equation.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Communication and OFDMA Service Model}{5}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}1}Vehicle-to-RSU Terrestrial Channel Model}{5}{subsubsection.3.4.1}\protected@file@percent }
+\newlabel{eq:rsu_gain}{{8}{5}{Vehicle-to-RSU Terrestrial Channel Model}{equation.8}{}}
 \citation{talukdar2026mappo}
-\newlabel{eq:ofdma}{{12}{5}{OFDMA Rate and Transmission-Service Model}{equation.12}{}}
-\newlabel{eq:radio_capacity}{{13}{5}{OFDMA Rate and Transmission-Service Model}{equation.13}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Computation, Backhaul, and Queueing Model}{5}{subsection.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}1}Persistent Multi-Stage Queue Model}{5}{subsubsection.3.5.1}\protected@file@percent }
-\newlabel{eq:queue}{{14}{5}{Persistent Multi-Stage Queue Model}{equation.14}{}}
-\newlabel{eq:conservation}{{15}{5}{Persistent Multi-Stage Queue Model}{equation.15}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}2}CPU Service and Processor-Sharing Model}{5}{subsubsection.3.5.2}\protected@file@percent }
-\newlabel{eq:cpu_capacity}{{16}{5}{CPU Service and Processor-Sharing Model}{equation.16}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}3}UAV Backhaul and Cloud-Service Model}{5}{subsubsection.3.5.3}\protected@file@percent }
-\newlabel{eq:cloud_capacity}{{17}{5}{UAV Backhaul and Cloud-Service Model}{equation.17}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}4}Queue-Stability Target}{5}{subsubsection.3.5.4}\protected@file@percent }
-\newlabel{eq:stability}{{18}{5}{Queue-Stability Target}{equation.18}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}UAV Movement and Collision-Avoidance Model}{5}{subsection.3.6}\protected@file@percent }
-\newlabel{eq:uav_motion}{{19}{5}{UAV Movement and Collision-Avoidance Model}{equation.19}{}}
-\newlabel{eq:flight_bounds}{{20}{5}{UAV Movement and Collision-Avoidance Model}{equation.20}{}}
-\newlabel{eq:collision}{{21}{5}{UAV Movement and Collision-Avoidance Model}{equation.21}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-G}}UAV and Infrastructure Energy-Consumption Models}{5}{subsection.3.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-G}1}Rotary-Wing Flight and Hovering-Energy Model}{5}{subsubsection.3.7.1}\protected@file@percent }
-\newlabel{eq:propulsion}{{22}{5}{Rotary-Wing Flight and Hovering-Energy Model}{equation.22}{}}
-\newlabel{eq:hovering}{{23}{5}{Rotary-Wing Flight and Hovering-Energy Model}{equation.23}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-G}2}Computation and Communication-Energy Model}{6}{subsubsection.3.7.2}\protected@file@percent }
-\newlabel{eq:energy_components}{{24}{6}{Computation and Communication-Energy Model}{equation.24}{}}
-\newlabel{eq:uav_energy}{{25}{6}{Computation and Communication-Energy Model}{equation.25}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-H}}Energy-Harvesting, Battery, and Return-Reserve Model}{6}{subsection.3.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-H}1}Stochastic Energy-Replenishment Model}{6}{subsubsection.3.8.1}\protected@file@percent }
-\newlabel{eq:stochastic_harvest}{{26}{6}{Stochastic Energy-Replenishment Model}{equation.26}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-H}2}Optional Position-Dependent Laser-Transfer Model}{6}{subsubsection.3.8.2}\protected@file@percent }
-\newlabel{eq:optional_laser}{{27}{6}{Optional Position-Dependent Laser-Transfer Model}{equation.27}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-H}3}Battery Evolution, Energy Causality, and Landing Reserve}{6}{subsubsection.3.8.3}\protected@file@percent }
-\newlabel{eq:battery}{{28}{6}{Battery Evolution, Energy Causality, and Landing Reserve}{equation.28}{}}
-\newlabel{eq:reserve}{{29}{6}{Battery Evolution, Energy Causality, and Landing Reserve}{equation.29}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {IV}Problem Formulation}{6}{section.4}\protected@file@percent }
-\newlabel{problem_formulation}{{IV}{6}{Problem Formulation}{section.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Instantaneous Cost Model}{6}{subsection.4.1}\protected@file@percent }
-\newlabel{eq:cost}{{30}{6}{Instantaneous Cost Model}{equation.30}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Long-Term Stochastic Optimization Problem}{6}{subsection.4.2}\protected@file@percent }
-\newlabel{eq:problem}{{31}{6}{Long-Term Stochastic Optimization Problem}{equation.31}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Proposed QA-DR-MADDPG\ Methodology}{7}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Constrained Markov Decision Process and Agent Roles}{7}{subsection.5.1}\protected@file@percent }
-\newlabel{eq:cmdp}{{32}{7}{Constrained Markov Decision Process and Agent Roles}{equation.32}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-A}1}State and Local Observations}{7}{subsubsection.5.1.1}\protected@file@percent }
-\newlabel{eq:method_state}{{33}{7}{State and Local Observations}{equation.33}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-A}2}Hybrid Joint Action Space}{7}{subsubsection.5.1.2}\protected@file@percent }
-\newlabel{eq:joint_action}{{34}{7}{Hybrid Joint Action Space}{equation.34}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-A}3}Transition and Cooperative Reward}{7}{subsubsection.5.1.3}\protected@file@percent }
-\newlabel{eq:transition_reward}{{35}{7}{Transition and Cooperative Reward}{equation.35}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Lyapunov Drift-Plus-Penalty Transformation}{7}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}1}Virtual Net-Energy Deficit}{7}{subsubsection.5.2.1}\protected@file@percent }
-\newlabel{eq:virtual_energy_correct}{{36}{7}{Virtual Net-Energy Deficit}{equation.36}{}}
-\newlabel{eq:dpp_bound_new}{{39}{7}{Virtual Net-Energy Deficit}{equation.39}{}}
-\newlabel{eq:dpp_score_new}{{40}{7}{Virtual Net-Energy Deficit}{equation.40}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Hybrid MADDPG Decision Engine}{7}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}1}Role-Shared Actors and Centralized Critics}{7}{subsubsection.5.3.1}\protected@file@percent }
-\newlabel{eq:actor_encoder}{{41}{7}{Role-Shared Actors and Centralized Critics}{equation.41}{}}
-\newlabel{eq:centralized_critic}{{42}{7}{Role-Shared Actors and Centralized Critics}{equation.42}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}2}Categorical and Continuous Action Heads}{8}{subsubsection.5.3.2}\protected@file@percent }
-\newlabel{eq:gumbel_action}{{43}{8}{Categorical and Continuous Action Heads}{equation.43}{}}
-\newlabel{eq:continuous_heads}{{44}{8}{Categorical and Continuous Action Heads}{equation.44}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}3}Feasibility Controller}{8}{subsubsection.5.3.3}\protected@file@percent }
-\newlabel{eq:feasibility_projection}{{45}{8}{Feasibility Controller}{equation.45}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}4}Critic, Actor, and Target Updates}{8}{subsubsection.5.3.4}\protected@file@percent }
-\newlabel{eq:critic_target_new}{{46}{8}{Critic, Actor, and Target Updates}{equation.46}{}}
-\newlabel{eq:critic_loss_new}{{47}{8}{Critic, Actor, and Target Updates}{equation.47}{}}
-\newlabel{eq:actor_objective_new}{{48}{8}{Critic, Actor, and Target Updates}{equation.48}{}}
-\newlabel{eq:polyak_new}{{49}{8}{Critic, Actor, and Target Updates}{equation.49}{}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Queue-aware domain-randomized Hybrid MADDPG}}{8}{algocf.1}\protected@file@percent }
-\newlabel{alg:dr_maddpg_new}{{1}{8}{Domain-Randomized Training and Deployment}{algocf.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Domain-Randomized Training and Deployment}{8}{subsection.5.4}\protected@file@percent }
-\newlabel{eq:domain_tuple_correct}{{50}{8}{Domain-Randomized Training and Deployment}{equation.50}{}}
-\newlabel{eq:dr_objective_new}{{51}{8}{Domain-Randomized Training and Deployment}{equation.51}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-E}}Computational and Storage Complexity}{9}{subsection.5.5}\protected@file@percent }
-\newlabel{eq:actor_complexity_new}{{52}{9}{Computational and Storage Complexity}{equation.52}{}}
-\newlabel{eq:critic_complexity_new}{{53}{9}{Computational and Storage Complexity}{equation.53}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Numerical Results}{9}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Simulation Configuration}{9}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Compared Learned Controllers and Metrics}{9}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Learning Behaviour}{9}{subsection.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Overall Service and Energy Performance}{9}{subsection.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Robustness Across Stress Conditions}{9}{subsection.6.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Physical, Workload, and Energy Parameters of the Reported Benchmark}}{10}{table.caption.6}\protected@file@percent }
-\newlabel{tab:sim}{{III}{10}{Physical, Workload, and Energy Parameters of the Reported Benchmark}{table.caption.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Validation learning curves for the five learned methods. Each line denotes an independent learner seed.}}{10}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:learning}{{3}{10}{Validation learning curves for the five learned methods. Each line denotes an independent learner seed}{figure.caption.9}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Learning Configuration}}{10}{table.caption.7}\protected@file@percent }
-\newlabel{tab:learning_config}{{IV}{10}{Learning Configuration}{table.caption.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-F}}Domain-Randomization Ablation}{10}{subsection.6.6}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Declared Domain Conditions}}{10}{table.caption.8}\protected@file@percent }
-\newlabel{tab:domains}{{V}{10}{Declared Domain Conditions}{table.caption.8}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Learner-Seed Mean Performance Across Held-Out Stress Conditions}}{11}{table.caption.10}\protected@file@percent }
-\newlabel{tab:overall}{{VI}{11}{Learner-Seed Mean Performance Across Held-Out Stress Conditions}{table.caption.10}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Overall performance of learned controllers. The energy panel must be read together with completion and backlog because a policy may save energy by keeping UAVs unavailable. Error bars are 95\% Student-$t$ intervals over five independent learner seeds.}}{11}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:overall}{{4}{11}{Overall performance of learned controllers. The energy panel must be read together with completion and backlog because a policy may save energy by keeping UAVs unavailable. Error bars are 95\% Student-$t$ intervals over five independent learner seeds}{figure.caption.11}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Mean completion rate for each learned method and held-out stress class.}}{11}{figure.caption.12}\protected@file@percent }
-\newlabel{fig:stress}{{5}{11}{Mean completion rate for each learned method and held-out stress class}{figure.caption.12}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Domain-Randomization Ablation}}{12}{table.caption.13}\protected@file@percent }
-\newlabel{tab:dr_ablation}{{VII}{12}{Domain-Randomization Ablation}{table.caption.13}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Nominal Hybrid MADDPG versus the domain-randomized proposed method. Error bars are 95\% Student-$t$ intervals over five learner seeds; paired difference intervals are reported in Table~\ref {tab:dr_ablation}.}}{12}{figure.caption.14}\protected@file@percent }
-\newlabel{fig:dr_ablation}{{6}{12}{Nominal Hybrid MADDPG versus the domain-randomized proposed method. Error bars are 95\% Student-$t$ intervals over five learner seeds; paired difference intervals are reported in Table~\ref {tab:dr_ablation}}{figure.caption.14}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-G}}Direct Physical-Queue-Weight Ablation}{12}{subsection.6.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-H}}Safety and Decision Latency}{12}{subsection.6.8}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Direct Physical-Queue-Weight Ablation of Domain-Randomized MADDPG}}{12}{table.caption.15}\protected@file@percent }
-\newlabel{tab:queue_ablation}{{VIII}{12}{Direct Physical-Queue-Weight Ablation of Domain-Randomized MADDPG}{table.caption.15}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Direct queue-weight ablation on the domain-randomized MADDPG backbone. Error bars are 95\% Student-$t$ intervals over five independently trained learner seeds; paired-difference intervals are reported in Table~\ref {tab:queue_ablation}.}}{12}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:queue_ablation}{{7}{12}{Direct queue-weight ablation on the domain-randomized MADDPG backbone. Error bars are 95\% Student-$t$ intervals over five independently trained learner seeds; paired-difference intervals are reported in Table~\ref {tab:queue_ablation}}{figure.caption.16}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-I}}Sensitivity and Scalability Scope}{12}{subsection.6.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-J}}Interpretation and Limitations}{12}{subsection.6.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}2}Vehicle-to-UAV Air-to-Ground Channel Model}{6}{subsubsection.3.4.2}\protected@file@percent }
+\newlabel{eq:los}{{9}{6}{Vehicle-to-UAV Air-to-Ground Channel Model}{equation.9}{}}
+\newlabel{eq:uav_gain}{{10}{6}{Vehicle-to-UAV Air-to-Ground Channel Model}{equation.10}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-D}3}OFDMA Rate and Transmission-Service Model}{6}{subsubsection.3.4.3}\protected@file@percent }
+\newlabel{eq:rate}{{11}{6}{OFDMA Rate and Transmission-Service Model}{equation.11}{}}
+\newlabel{eq:ofdma}{{12}{6}{OFDMA Rate and Transmission-Service Model}{equation.12}{}}
+\newlabel{eq:radio_capacity}{{13}{6}{OFDMA Rate and Transmission-Service Model}{equation.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Computation, Backhaul, and Queueing Model}{6}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}1}Persistent Multi-Stage Queue Model}{6}{subsubsection.3.5.1}\protected@file@percent }
+\newlabel{eq:queue}{{14}{6}{Persistent Multi-Stage Queue Model}{equation.14}{}}
+\newlabel{eq:conservation}{{15}{6}{Persistent Multi-Stage Queue Model}{equation.15}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}2}CPU Service and Processor-Sharing Model}{6}{subsubsection.3.5.2}\protected@file@percent }
+\newlabel{eq:cpu_capacity}{{16}{6}{CPU Service and Processor-Sharing Model}{equation.16}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}3}UAV Backhaul and Cloud-Service Model}{6}{subsubsection.3.5.3}\protected@file@percent }
+\newlabel{eq:cloud_capacity}{{17}{6}{UAV Backhaul and Cloud-Service Model}{equation.17}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-E}4}Queue-Stability Target}{6}{subsubsection.3.5.4}\protected@file@percent }
+\newlabel{eq:stability}{{18}{6}{Queue-Stability Target}{equation.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}UAV Movement and Collision-Avoidance Model}{6}{subsection.3.6}\protected@file@percent }
+\newlabel{eq:uav_motion}{{19}{6}{UAV Movement and Collision-Avoidance Model}{equation.19}{}}
+\newlabel{eq:flight_bounds}{{20}{6}{UAV Movement and Collision-Avoidance Model}{equation.20}{}}
+\newlabel{eq:collision}{{21}{6}{UAV Movement and Collision-Avoidance Model}{equation.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-G}}UAV and Infrastructure Energy-Consumption Models}{6}{subsection.3.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces UAV energy, harvesting, and return-reserve model. Physical battery charge supplies propulsion, computation, communication, and control energy; normal service is admitted only when current expenditure and a verified return or landing reserve remain feasible. The virtual deficit is an accounting queue rather than stored energy.}}{7}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:energy_safety_overview}{{3}{7}{UAV energy, harvesting, and return-reserve model. Physical battery charge supplies propulsion, computation, communication, and control energy; normal service is admitted only when current expenditure and a verified return or landing reserve remain feasible. The virtual deficit is an accounting queue rather than stored energy}{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-G}1}Rotary-Wing Flight and Hovering-Energy Model}{7}{subsubsection.3.7.1}\protected@file@percent }
+\newlabel{eq:propulsion}{{22}{7}{Rotary-Wing Flight and Hovering-Energy Model}{equation.22}{}}
+\newlabel{eq:hovering}{{23}{7}{Rotary-Wing Flight and Hovering-Energy Model}{equation.23}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-G}2}Computation and Communication-Energy Model}{7}{subsubsection.3.7.2}\protected@file@percent }
+\newlabel{eq:energy_components}{{24}{7}{Computation and Communication-Energy Model}{equation.24}{}}
+\newlabel{eq:uav_energy}{{25}{7}{Computation and Communication-Energy Model}{equation.25}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-H}}Energy-Harvesting, Battery, and Return-Reserve Model}{7}{subsection.3.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-H}1}Stochastic Energy-Replenishment Model}{7}{subsubsection.3.8.1}\protected@file@percent }
+\newlabel{eq:stochastic_harvest}{{26}{7}{Stochastic Energy-Replenishment Model}{equation.26}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-H}2}Optional Position-Dependent Laser-Transfer Model}{8}{subsubsection.3.8.2}\protected@file@percent }
+\newlabel{eq:optional_laser}{{27}{8}{Optional Position-Dependent Laser-Transfer Model}{equation.27}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-H}3}Battery Evolution, Energy Causality, and Landing Reserve}{8}{subsubsection.3.8.3}\protected@file@percent }
+\newlabel{eq:battery}{{28}{8}{Battery Evolution, Energy Causality, and Landing Reserve}{equation.28}{}}
+\newlabel{eq:reserve}{{29}{8}{Battery Evolution, Energy Causality, and Landing Reserve}{equation.29}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Problem Formulation}{8}{section.4}\protected@file@percent }
+\newlabel{problem_formulation}{{IV}{8}{Problem Formulation}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Instantaneous Cost Model}{8}{subsection.4.1}\protected@file@percent }
+\newlabel{eq:cost}{{30}{8}{Instantaneous Cost Model}{equation.30}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Long-Term Stochastic Optimization Problem}{8}{subsection.4.2}\protected@file@percent }
+\newlabel{eq:problem}{{31}{8}{Long-Term Stochastic Optimization Problem}{equation.31}{}}
+\newlabel{con:routing}{{{C1}}{8}{Long-Term Stochastic Optimization Problem}{AMS.6}{}}
+\newlabel{con:mask}{{{C2}}{8}{Long-Term Stochastic Optimization Problem}{AMS.7}{}}
+\newlabel{con:split}{{{C3}}{8}{Long-Term Stochastic Optimization Problem}{AMS.8}{}}
+\newlabel{con:radio}{{{C4}}{8}{Long-Term Stochastic Optimization Problem}{AMS.9}{}}
+\newlabel{con:processor}{{{C5}}{8}{Long-Term Stochastic Optimization Problem}{AMS.10}{}}
+\newlabel{con:cpu-service}{{{C6}}{8}{Long-Term Stochastic Optimization Problem}{AMS.11}{}}
+\newlabel{con:backhaul-cloud}{{{C7}}{8}{Long-Term Stochastic Optimization Problem}{AMS.12}{}}
+\newlabel{con:queue-causality}{{{C8}}{8}{Long-Term Stochastic Optimization Problem}{AMS.13}{}}
+\newlabel{con:position}{{{C9}}{9}{Long-Term Stochastic Optimization Problem}{AMS.14}{}}
+\newlabel{con:speed}{{{C10}}{9}{Long-Term Stochastic Optimization Problem}{AMS.15}{}}
+\newlabel{con:acceleration}{{{C11}}{9}{Long-Term Stochastic Optimization Problem}{AMS.16}{}}
+\newlabel{con:separation}{{{C12}}{9}{Long-Term Stochastic Optimization Problem}{AMS.17}{}}
+\newlabel{con:battery-dynamics}{{{C13}}{9}{Long-Term Stochastic Optimization Problem}{AMS.18}{}}
+\newlabel{con:energy-reserve}{{{C14}}{9}{Long-Term Stochastic Optimization Problem}{AMS.19}{}}
+\newlabel{con:queue-stability}{{{C15}}{9}{Long-Term Stochastic Optimization Problem}{AMS.20}{}}
+\newlabel{con:average-energy}{{{C16}}{9}{Long-Term Stochastic Optimization Problem}{AMS.21}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Proposed QA-DR-MADDPG\ Methodology}{9}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Constrained Markov Decision Process and Agent Roles}{9}{subsection.5.1}\protected@file@percent }
+\newlabel{eq:cmdp}{{49}{9}{Constrained Markov Decision Process and Agent Roles}{equation.49}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-A}1}State and Local Observations}{9}{subsubsection.5.1.1}\protected@file@percent }
+\newlabel{eq:method_state}{{50}{9}{State and Local Observations}{equation.50}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-A}2}Hybrid Joint Action Space}{9}{subsubsection.5.1.2}\protected@file@percent }
+\newlabel{eq:joint_action}{{51}{9}{Hybrid Joint Action Space}{equation.51}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-A}3}Transition and Cooperative Reward}{9}{subsubsection.5.1.3}\protected@file@percent }
+\newlabel{eq:transition_reward}{{52}{9}{Transition and Cooperative Reward}{equation.52}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Lyapunov Drift-Plus-Penalty Transformation}{10}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-B}1}Virtual Net-Energy Deficit}{10}{subsubsection.5.2.1}\protected@file@percent }
+\newlabel{eq:virtual_energy_correct}{{53}{10}{Virtual Net-Energy Deficit}{equation.53}{}}
+\newlabel{eq:dpp_bound_new}{{56}{10}{Virtual Net-Energy Deficit}{equation.56}{}}
+\newlabel{eq:dpp_score_new}{{57}{10}{Virtual Net-Energy Deficit}{equation.57}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Hybrid MADDPG Decision Engine}{10}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}1}Role-Shared Actors and Centralized Critics}{10}{subsubsection.5.3.1}\protected@file@percent }
+\newlabel{eq:actor_encoder}{{58}{10}{Role-Shared Actors and Centralized Critics}{equation.58}{}}
+\newlabel{eq:centralized_critic}{{59}{10}{Role-Shared Actors and Centralized Critics}{equation.59}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}2}Categorical and Continuous Action Heads}{10}{subsubsection.5.3.2}\protected@file@percent }
+\newlabel{eq:gumbel_action}{{60}{10}{Categorical and Continuous Action Heads}{equation.60}{}}
+\newlabel{eq:continuous_heads}{{61}{10}{Categorical and Continuous Action Heads}{equation.61}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}3}Feasibility Controller}{10}{subsubsection.5.3.3}\protected@file@percent }
+\newlabel{eq:feasibility_projection}{{62}{10}{Feasibility Controller}{equation.62}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}4}Critic, Actor, and Target Updates}{10}{subsubsection.5.3.4}\protected@file@percent }
+\newlabel{eq:critic_target_new}{{63}{10}{Critic, Actor, and Target Updates}{equation.63}{}}
+\newlabel{eq:critic_loss_new}{{64}{10}{Critic, Actor, and Target Updates}{equation.64}{}}
+\newlabel{eq:actor_objective_new}{{65}{10}{Critic, Actor, and Target Updates}{equation.65}{}}
+\newlabel{eq:polyak_new}{{66}{10}{Critic, Actor, and Target Updates}{equation.66}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Queue-aware Lyapunov feedback used by the common reward. Physical task queues and the virtual net-energy deficit enter the drift-plus-penalty score, whose negative is supplied to the cooperative controller. Executed decisions then determine queue service and energy expenditure in the next transition.}}{11}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:lyapunov_feedback}{{4}{11}{Queue-aware Lyapunov feedback used by the common reward. Physical task queues and the virtual net-energy deficit enter the drift-plus-penalty score, whose negative is supplied to the cooperative controller. Executed decisions then determine queue service and energy expenditure in the next transition}{figure.caption.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Complete QA-DR-MADDPG\ architecture. Vehicle, RSU, and UAV actors use role-local observations at execution time, whereas centralized critics and the shared replay buffer are active only during training. The feasibility controller separates neural proposals from physically executed actions.}}{11}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:controller_architecture}{{5}{11}{Complete \method \ architecture. Vehicle, RSU, and UAV actors use role-local observations at execution time, whereas centralized critics and the shared replay buffer are active only during training. The feasibility controller separates neural proposals from physically executed actions}{figure.caption.23}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Domain-Randomized Training and Deployment}{11}{subsection.5.4}\protected@file@percent }
+\newlabel{eq:domain_tuple_correct}{{67}{11}{Domain-Randomized Training and Deployment}{equation.67}{}}
+\newlabel{eq:dr_objective_new}{{68}{11}{Domain-Randomized Training and Deployment}{equation.68}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Deterministic feasibility-controller workflow. A neural hybrid proposal is checked against routing, resource, queue-causality, motion, continuous-path separation, battery, and return-reserve constraints. The controller executes the nearest admissible repair or invokes a verified return or landing contingency.}}{12}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:feasibility_workflow}{{6}{12}{Deterministic feasibility-controller workflow. A neural hybrid proposal is checked against routing, resource, queue-causality, motion, continuous-path separation, battery, and return-reserve constraints. The controller executes the nearest admissible repair or invokes a verified return or landing contingency}{figure.caption.24}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Domain-randomized training, validation, and deployment workflow. Seven stress classes update one common parameter set; disjoint validation selects an improved zero-violation checkpoint. Deployment freezes the chosen actors and disables centralized critics, replay sampling, and gradient updates.}}{12}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:dr_workflow}{{7}{12}{Domain-randomized training, validation, and deployment workflow. Seven stress classes update one common parameter set; disjoint validation selects an improved zero-violation checkpoint. Deployment freezes the chosen actors and disables centralized critics, replay sampling, and gradient updates}{figure.caption.25}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-E}}Computational and Storage Complexity}{12}{subsection.5.5}\protected@file@percent }
+\newlabel{eq:actor_complexity_new}{{69}{12}{Computational and Storage Complexity}{equation.69}{}}
+\newlabel{eq:critic_complexity_new}{{70}{12}{Computational and Storage Complexity}{equation.70}{}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Queue-aware domain-randomized Hybrid MADDPG}}{13}{algocf.1}\protected@file@percent }
+\newlabel{alg:dr_maddpg_new}{{1}{13}{Domain-Randomized Training and Deployment}{algocf.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Numerical Results}{13}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Simulation Configuration}{13}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Compared Learned Controllers and Metrics}{13}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Learning Behaviour}{13}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Overall Service and Energy Performance}{13}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Robustness Across Stress Conditions}{13}{subsection.6.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Physical, Workload, and Energy Parameters of the Reported Benchmark}}{14}{table.caption.27}\protected@file@percent }
+\newlabel{tab:sim}{{III}{14}{Physical, Workload, and Energy Parameters of the Reported Benchmark}{table.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Validation learning curves for the proposed method, nominal Hybrid MADDPG, Reptile-MADDPG, and Hybrid MAPPO. Each line denotes an independent learner seed; a short centered moving average is used only to improve visibility of the per-seed trend.}}{14}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:learning}{{8}{14}{Validation learning curves for the proposed method, nominal Hybrid MADDPG, Reptile-MADDPG, and Hybrid MAPPO. Each line denotes an independent learner seed; a short centered moving average is used only to improve visibility of the per-seed trend}{figure.caption.30}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-F}}Sensitivity to Offered Load}{14}{subsection.6.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Mean validation reward per slot for all learned techniques. Each run is mapped to normalized training progress because early stopping produces different epoch counts. Solid lines average all five independent learner seeds, and shaded regions are 95\% Student-$t$ confidence intervals.}}{15}{figure.caption.31}\protected@file@percent }
+\newlabel{fig:learning_mean}{{9}{15}{Mean validation reward per slot for all learned techniques. Each run is mapped to normalized training progress because early stopping produces different epoch counts. Solid lines average all five independent learner seeds, and shaded regions are 95\% Student-$t$ confidence intervals}{figure.caption.31}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Overall performance of learned controllers. The energy panel must be read together with completion and backlog because a policy may save energy by keeping UAVs unavailable. Error bars are 95\% Student-$t$ intervals over five independent learner seeds.}}{15}{figure.caption.33}\protected@file@percent }
+\newlabel{fig:overall}{{10}{15}{Overall performance of learned controllers. The energy panel must be read together with completion and backlog because a policy may save energy by keeping UAVs unavailable. Error bars are 95\% Student-$t$ intervals over five independent learner seeds}{figure.caption.33}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Learning Configuration}}{16}{table.caption.28}\protected@file@percent }
+\newlabel{tab:learning_config}{{IV}{16}{Learning Configuration}{table.caption.28}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Declared Domain Conditions}}{16}{table.caption.29}\protected@file@percent }
+\newlabel{tab:domains}{{V}{16}{Declared Domain Conditions}{table.caption.29}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-G}}Domain-Randomization Ablation}{16}{subsection.6.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-H}}Direct Physical-Queue-Weight Ablation}{16}{subsection.6.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-I}}Safety and Decision Latency}{16}{subsection.6.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-J}}Topology and Capacity Scalability Scope}{16}{subsection.6.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-K}}Interpretation and Limitations}{16}{subsection.6.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{16}{section.7}\protected@file@percent }
 \bibcite{zhang2019mobile}{1}
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Learner-Seed Mean Performance Across Held-Out Stress Conditions}}{17}{table.caption.32}\protected@file@percent }
+\newlabel{tab:overall}{{VI}{17}{Learner-Seed Mean Performance Across Held-Out Stress Conditions}{table.caption.32}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Sensitivity to offered-load ratio for the five learned controllers. Lines show learner-seed means and shaded regions show 95\% Student-$t$ confidence intervals. Backlog and reward use all five independently trained seeds. The p95 response time uses completed tasks and four available seeds for the two Reptile variants because their fifth seed completed no tasks; all other latency series use five seeds. Final backlog retains unfinished work.}}{17}{figure.caption.34}\protected@file@percent }
+\newlabel{fig:load_sensitivity}{{11}{17}{Sensitivity to offered-load ratio for the five learned controllers. Lines show learner-seed means and shaded regions show 95\% Student-$t$ confidence intervals. Backlog and reward use all five independently trained seeds. The p95 response time uses completed tasks and four available seeds for the two Reptile variants because their fifth seed completed no tasks; all other latency series use five seeds. Final backlog retains unfinished work}{figure.caption.34}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Domain-Randomization Ablation}}{17}{table.caption.35}\protected@file@percent }
+\newlabel{tab:dr_ablation}{{VII}{17}{Domain-Randomization Ablation}{table.caption.35}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Nominal Hybrid MADDPG versus the domain-randomized proposed method. Error bars are 95\% Student-$t$ intervals over five learner seeds; paired difference intervals are reported in Table~\ref {tab:dr_ablation}.}}{17}{figure.caption.36}\protected@file@percent }
+\newlabel{fig:dr_ablation}{{12}{17}{Nominal Hybrid MADDPG versus the domain-randomized proposed method. Error bars are 95\% Student-$t$ intervals over five learner seeds; paired difference intervals are reported in Table~\ref {tab:dr_ablation}}{figure.caption.36}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Direct Physical-Queue-Weight Ablation of Domain-Randomized MADDPG}}{17}{table.caption.37}\protected@file@percent }
+\newlabel{tab:queue_ablation}{{VIII}{17}{Direct Physical-Queue-Weight Ablation of Domain-Randomized MADDPG}{table.caption.37}{}}
 \bibcite{liu2020uav}{2}
 \bibcite{neely2010stochastic}{3}
 \bibcite{mao2017dynamic}{4}
@@ -189,6 +241,7 @@
 \bibcite{tobin2017domain}{16}
 \bibcite{peng2018sim}{17}
 \bibcite{zhang2019predictive}{18}
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{13}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{References}{13}{section*.17}\protected@file@percent }
-\gdef \@abspage@last{13}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Direct queue-weight ablation on the domain-randomized MADDPG backbone. Error bars are 95\% Student-$t$ intervals over five independently trained learner seeds; paired-difference intervals are reported in Table~\ref {tab:queue_ablation}.}}{18}{figure.caption.38}\protected@file@percent }
+\newlabel{fig:queue_ablation}{{13}{18}{Direct queue-weight ablation on the domain-randomized MADDPG backbone. Error bars are 95\% Student-$t$ intervals over five independently trained learner seeds; paired-difference intervals are reported in Table~\ref {tab:queue_ablation}}{figure.caption.38}{}}
+\@writefile{toc}{\contentsline {section}{References}{18}{section*.39}\protected@file@percent }
+\gdef \@abspage@last{18}

@@ -306,8 +306,16 @@ def network_and_slot_schematic() -> None:
 
 
 def learning_curves() -> None:
-    figure, axes = plt.subplots(2, 3, figsize=(11.2, 6.2), constrained_layout=True, sharey=True)
-    for axis, method in zip(axes.flat, METHODS):
+    learning_methods = (
+        "domain_randomized_maddpg",
+        "hybrid_maddpg",
+        "reptile_maddpg",
+        "hybrid_mappo",
+    )
+    figure, axes = plt.subplots(
+        2, 2, figsize=(9.4, 6.4), constrained_layout=True, sharey=True
+    )
+    for axis, method in zip(axes.flat, learning_methods):
         method_root = STUDY / "training" / method
         seed_dirs = sorted(method_root.glob("seed-*"))
         seed_colors = plt.cm.viridis(np.linspace(0.10, 0.90, max(1, len(seed_dirs))))
@@ -342,8 +350,161 @@ def learning_curves() -> None:
         axis.spines[["top", "right"]].set_visible(False)
     axes[0, 0].set_ylabel("Validation reward per slot")
     axes[1, 0].set_ylabel("Validation reward per slot")
-    axes[1, 2].axis("off")
     figure.savefig(FIGURES / "learning_curves_learned_methods.png", dpi=240)
+    plt.close(figure)
+
+
+def combined_mean_learning_curve() -> None:
+    """Compare all methods while retaining every seed in every mean."""
+    progress = np.linspace(0.0, 100.0, 101)
+    figure, axis = plt.subplots(figsize=(8.4, 4.7), constrained_layout=True)
+
+    for method in METHODS:
+        seed_curves: list[np.ndarray] = []
+        method_root = STUDY / "training" / method
+        for seed_dir in sorted(method_root.glob("seed-*")):
+            history = seed_dir / "history.jsonl"
+            if not history.exists():
+                continue
+            records = [
+                json.loads(line)
+                for line in history.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            values = np.asarray(
+                [
+                    record["validation_mean_reward_per_slot"]
+                    for record in records
+                    if "validation_mean_reward_per_slot" in record
+                ],
+                dtype=float,
+            )
+            if len(values) < 2:
+                continue
+            seed_progress = np.linspace(0.0, 100.0, len(values))
+            seed_curves.append(np.interp(progress, seed_progress, values))
+
+        if not seed_curves:
+            continue
+        matrix = np.vstack(seed_curves)
+        mean = matrix.mean(axis=0)
+        if matrix.shape[0] > 1:
+            half_width = (
+                2.776 * matrix.std(axis=0, ddof=1) / np.sqrt(matrix.shape[0])
+            )
+        else:
+            half_width = np.zeros_like(mean)
+        axis.plot(
+            progress,
+            mean,
+            color=COLORS[method],
+            linewidth=2.1,
+            label=LABELS[method],
+        )
+        axis.fill_between(
+            progress,
+            mean - half_width,
+            mean + half_width,
+            color=COLORS[method],
+            alpha=0.12,
+            linewidth=0,
+        )
+
+    axis.set_xlabel("Normalized training progress (%)")
+    axis.set_ylabel("Validation reward per slot")
+    axis.grid(alpha=0.22, linewidth=0.7)
+    axis.spines[["top", "right"]].set_visible(False)
+    axis.legend(ncol=2, frameon=False, fontsize=8, loc="best")
+    figure.savefig(FIGURES / "validation_reward_mean_all_methods.png", dpi=240)
+    plt.close(figure)
+
+
+def offered_load_sensitivity(rows: list[dict[str, str]]) -> None:
+    """Plot seed-level uncertainty across the three completed load regimes."""
+    load_points = (
+        ("low_load", 0.35),
+        ("near_capacity", 0.85),
+        ("overload", 1.25),
+    )
+    metric_specs = (
+        ("response_time_p95_s", "95th-percentile response time (s)", 1.0),
+        ("final_backlog_cycles", "Final backlog (Gcycles)", 1.0e9),
+        ("cumulative_reward", "Reward per slot", 300.0),
+    )
+    markers = ("o", "s", "^", "D", "P")
+    figure, axes = plt.subplots(
+        1, 3, figsize=(12.0, 3.8), constrained_layout=True
+    )
+
+    for method_index, method in enumerate(METHODS):
+        x = np.asarray([load for _, load in load_points], dtype=float)
+        for axis, (metric, ylabel, scale) in zip(axes, metric_specs, strict=True):
+            means: list[float] = []
+            lower: list[float] = []
+            upper: list[float] = []
+            for stress, _ in load_points:
+                values = np.asarray(
+                    [
+                        float(row[metric]) / scale
+                        for row in rows
+                        if row["method"] == method
+                        and row["stress"] == stress
+                        and row.get(metric) not in (None, "")
+                    ],
+                    dtype=float,
+                )
+                expected = 4 if metric == "response_time_p95_s" and method in {
+                    "reptile_maddpg",
+                    "reptile_no_queue_weight",
+                } else 5
+                if len(values) != expected:
+                    raise ValueError(
+                        f"expected {expected} learner seeds for {method}/{stress}/{metric}, "
+                        f"found {len(values)}"
+                    )
+                mean = float(values.mean())
+                t_critical = {4: 3.182, 5: 2.776}[len(values)]
+                half_width = float(
+                    t_critical * values.std(ddof=1) / np.sqrt(len(values))
+                )
+                means.append(mean)
+                lower.append(mean - half_width)
+                upper.append(mean + half_width)
+            axis.plot(
+                x,
+                means,
+                color=COLORS[method],
+                marker=markers[method_index],
+                markersize=5.0,
+                linewidth=1.9,
+                label=LABELS[method],
+            )
+            axis.fill_between(
+                x,
+                lower,
+                upper,
+                color=COLORS[method],
+                alpha=0.10,
+                linewidth=0,
+            )
+            axis.set_xlabel("Offered-load ratio")
+            axis.set_ylabel(ylabel)
+            axis.set_xticks(x, ["0.35", "0.85", "1.25"])
+            axis.grid(alpha=0.22, linewidth=0.7)
+            axis.spines[["top", "right"]].set_visible(False)
+
+    axes[0].set_ylim(bottom=0.0)
+    axes[1].set_ylim(bottom=0.0)
+    handles, labels = axes[0].get_legend_handles_labels()
+    figure.legend(
+        handles,
+        labels,
+        loc="outside upper center",
+        ncol=5,
+        frameon=False,
+        fontsize=8,
+    )
+    figure.savefig(FIGURES / "offered_load_sensitivity.png", dpi=240)
     plt.close(figure)
 
 
@@ -357,6 +518,8 @@ def main() -> None:
         read_rows(QUEUE_ABLATION_STUDY / "learner_seed_confidence_intervals.csv")
     )
     learning_curves()
+    combined_mean_learning_curve()
+    offered_load_sensitivity(rows)
     network_and_slot_schematic()
 
 

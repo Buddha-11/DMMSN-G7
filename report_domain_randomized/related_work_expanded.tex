@@ -1,8 +1,8 @@
 \section{Related Work}
-The proposed controller lies at the intersection of UAV-assisted vehicular
+Four areas inform the controller developed here: UAV-assisted vehicular
 edge computing, queue-aware stochastic control, multi-agent reinforcement
-learning, and robust policy training. This section compares the closest
-capabilities instead of treating these research streams independently.
+learning, and robust policy training. We organize the discussion around the
+capabilities each area contributes to the task-service and control problem.
 
 \subsection{UAV-Assisted MEC and End-to-End Task Service}
 UAV-mounted edge servers can shorten access distance and follow spatially
@@ -16,11 +16,11 @@ use multi-agent policies for task partitioning and resource allocation
 \cite{liang2025rav}. These studies motivate joint control, but a task is often
 represented by a single delay expression or one-slot allocation.
 
-The present model instead follows every task through ingress, radio upload,
+Our model records the stages a task actually visits: ingress, radio upload,
 receive staging, edge computation, UAV--cloud backhaul, cloud computation,
-and branch synchronization. This lifecycle representation distinguishes a
-fast radio transfer from a short end-to-end response time and permits
-unfinished work to remain visible after a deadline crossing.
+and branch synchronization. Retaining these stages makes it possible to
+account for waiting beyond the radio link. Tasks that miss their deadlines
+remain in the service model until completion or the end of the trace.
 
 \subsection{Queue-Aware Vehicular Offloading and Lyapunov Control}
 Lyapunov optimization converts a long-horizon stochastic control problem into
@@ -65,11 +65,12 @@ of environments and then deployed without online parameter updates. This
 principle has been used to improve robustness to model variation in learned
 control \cite{tobin2017domain,peng2018sim}.
 
-The distinction is important for the present evidence. The evaluated policy
-does not perform few-shot adaptation. It is trained on declared load,
-harvesting, outage, and backhaul conditions, then frozen and tested on
-disjoint stochastic traces from the same declared domain family. No claim is
-made about unmodeled shifts outside that family.
+This distinction determines how our evaluation should be read. Training
+covers a declared family of load, harvesting, outage, and backhaul
+conditions. We then freeze the policy and evaluate it on disjoint stochastic
+traces drawn from that family. These experiments assess fixed-policy
+generalization; they do not establish few-shot adaptation or robustness to
+operating changes outside the specified family.
 
 \subsection{Energy-Aware Flight and Safe Execution}
 UAV service decisions share a finite battery with propulsion, communication,
@@ -84,11 +85,43 @@ slot trajectories, rather than relying on a reward penalty to prevent
 collision or battery exhaustion.
 
 \subsection{Synthesis and Research Gap}
-Table~\ref{tab:positioning} summarizes the resulting gap. Existing work
-provides individual parts of the solution, but the cited formulations do not
-simultaneously combine persistent end-to-end VEC queues, hybrid multi-role
-actions, safe three-dimensional flight, finite UAV/cloud service, and a
-fixed policy trained across held-out operating conditions.
+Table~\ref{tab:positioning} relates these research streams to the design
+choices in this work. Although prior studies establish the individual value of
+mobile edge servers, Lyapunov queue control, multi-agent learning, robust
+training, and energy-aware flight, combining these ingredients is not a direct
+composition. A routing action changes the arrival process of a downstream
+queue; a processor or backhaul allocation changes both task delay and energy
+consumption; and UAV motion changes the future channel, propulsion demand, and
+return reserve. Treating any one of these effects outside the common state and
+transition model can transfer congestion or energy cost to a stage that the
+controller does not observe.
+
+Three specific gaps motivate the proposed framework. First, much of the
+offloading literature represents service through an instantaneous rate or an
+aggregate delay, which does not reveal where unfinished work waits after it is
+dispatched. An evaluation based on such a model may count assigned work as
+successful even when upload, computation, synchronization, or backhaul service
+remains incomplete. Second, standard MADDPG or MAPPO supplies a learning
+mechanism but does not by itself enforce processor capacity, battery causality,
+continuous-path separation, or a safe return reserve. Reward penalties alone
+cannot guarantee these constraints at execution. Third, a policy that performs
+well in a nominal simulator is not automatically reliable under load,
+harvesting, outage, or backhaul changes. Meta-learning addresses rapid
+adaptation, but it assumes that post-deployment data and gradient updates are
+available; that assumption does not match the zero-update deployment studied
+here.
+
+Accordingly, the missing capability is a fixed multi-agent policy that observes
+end-to-end congestion, coordinates the mixed decisions of heterogeneous
+agents, respects hard physical constraints, and is trained and tested across a
+declared family of operating regimes. The proposed framework addresses this
+gap through persistent task-level queues, Lyapunov-derived physical and virtual
+queue signals, hybrid CTDE control, and a deterministic feasibility layer. Its
+evaluation freezes the trained actors and uses paired held-out traces so that
+differences between controllers are not caused by different traffic or channel
+realizations. This design supports a claim of robustness within the declared
+domain family; it does not claim guaranteed performance for arbitrary
+out-of-distribution conditions.
 
 \begin{table*}[!t]
 \caption{Positioning of the Proposed Framework Relative to the Main Research Streams}
@@ -99,12 +132,12 @@ fixed policy trained across held-out operating conditions.
 \toprule
 Research stream & Established capability & Gap addressed in this work\\
 \midrule
-UAV-assisted MEC & Joint offloading, computing, radio allocation, and trajectory-aware service & Explicit vehicle--RSU--UAV--cloud stage queues, task records, branch synchronization, and finite backhaul\\
-Queue-aware VEC & Lyapunov-weighted offloading and UAV path planning & Transport and staging queues, weighted CPU sharing, censored unfinished tasks, and virtual net-energy accounting\\
-MADDPG/MAPPO & Coordinated deterministic or stochastic multi-agent policies & Masked categorical routing combined with continuous split, CPU, and flight actions\\
-Meta-RL & Initialization for limited-update adaptation & Fixed zero-update deployment; no few-shot claim is assigned to the evaluated policy\\
-Domain randomization & Robust control over a declared parameter distribution & Paired held-out evaluation across traffic, harvesting, outage, and backhaul regimes\\
-Energy-aware UAV control & Propulsion and computation energy models & Whole-system energy ledger, battery causality, collision avoidance, and verified return/landing reserve\\
+UAV-assisted MEC~\cite{liu2020uav,xiong2021energy,guo2024multi} & Joint offloading, computing, radio allocation, and trajectory-aware service & Explicit vehicle--RSU--UAV--cloud stage queues, task records, branch synchronization, and finite backhaul\\
+Queue-aware VEC~\cite{neely2010stochastic,mao2017dynamic,sun2026qtop} & Lyapunov-weighted offloading and UAV path planning & Transport and staging queues, weighted CPU sharing, censored unfinished tasks, and virtual net-energy accounting\\
+MADDPG/MAPPO~\cite{lowe2017multi,schulman2017proximal,talukdar2026mappo} & Coordinated deterministic or stochastic multi-agent policies & Masked categorical routing combined with continuous split, CPU, and flight actions\\
+Meta-RL~\cite{finn2017model,nichol2018reptile,yan2026rmaddpg} & Initialization for limited-update adaptation & Fixed zero-update deployment; no few-shot claim is assigned to the evaluated policy\\
+Domain randomization~\cite{tobin2017domain,peng2018sim} & Robust control over a declared parameter distribution & Paired held-out evaluation across traffic, harvesting, outage, and backhaul regimes\\
+Energy-aware UAV control~\cite{liu2020uav,talukdar2026mappo,zhang2019predictive} & Propulsion and computation energy models & Whole-system energy ledger, battery causality, collision avoidance, and verified return/landing reserve\\
 \bottomrule
 \end{tabular}
 \end{table*}

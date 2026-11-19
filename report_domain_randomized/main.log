@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.10)  16 NOV 2026 08:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.10)  19 NOV 2026 01:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -613,147 +613,225 @@ LaTeX Font Info:    Trying to load font information for U+rsfs on input line 33
 (C:\Users\ASUS\AppData\Local\Programs\MiKTeX\tex/latex/jknappen\ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
 )
-(related_work_expanded.tex [1{C:/Users/ASUS/AppData/Local/MiKTeX/fonts/map/pdft
-ex/pdftex.map}{C:/Users/ASUS/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base
-/8r.enc}
+[1{C:/Users/ASUS/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/ASU
+S/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
-]) (restored_system_model.tex [2]
-<figures/network_and_slot_schematic.png, id=316, 809.424pt x 296.307pt>
-File: figures/network_and_slot_schematic.png Graphic file (type png)
-<use figures/network_and_slot_schematic.png>
-Package pdftex.def Info: figures/network_and_slot_schematic.png  used on input 
-line 44.
-(pdftex.def)             Requested size: 495.36346pt x 181.3393pt.
-
-Underfull \hbox (badness 3635) in paragraph at lines 217--218
- \OT1/ptm/m/it/10 1) Vehicle-to-RSU Ter-res-trial Chan-nel Model: [][][] \OT1/p
-tm/m/n/10 For a
+]
+(related_work_expanded.tex [2]
+Underfull \hbox (badness 10000) in paragraph at lines 140--140
+[]|\OT1/ptm/m/n/8 Energy-aware UAV
  []
 
-[3] [4 <./figures/network_and_slot_schematic.png>] [5]) [6]
-(methodology_expanded.tex [7] [8])
-Underfull \hbox (badness 2529) in paragraph at lines 590--600
-[]\OT1/ptm/m/n/10 The com-par-i-son in-cludes nom-i-nal Hy-brid MAD-DPG,
- []
-
-
-Underfull \hbox (badness 2846) in paragraph at lines 590--600
-\OT1/ptm/m/n/10 pro-posed QA-DR-MADDPG, Reptile-MADDPG, Reptile-
- []
-
-<figures/learning_curves_learned_methods.png, id=445, 809.424pt x 448.074pt>
-File: figures/learning_curves_learned_methods.png Graphic file (type png)
-<use figures/learning_curves_learned_methods.png>
-Package pdftex.def Info: figures/learning_curves_learned_methods.png  used on i
-nput line 625.
-(pdftex.def)             Requested size: 490.19843pt x 271.3625pt.
-<figures/overall_learned_methods.png, id=448, 751.608pt x 476.982pt>
-File: figures/overall_learned_methods.png Graphic file (type png)
-<use figures/overall_learned_methods.png>
-Package pdftex.def Info: figures/overall_learned_methods.png  used on input lin
-e 661.
-(pdftex.def)             Requested size: 474.71906pt x 301.26445pt.
-<figures/stress_completion_heatmap.png, id=450, 766.062pt x 325.215pt>
-File: figures/stress_completion_heatmap.png Graphic file (type png)
-<use figures/stress_completion_heatmap.png>
-Package pdftex.def Info: figures/stress_completion_heatmap.png  used on input l
-ine 687.
-(pdftex.def)             Requested size: 469.56189pt x 199.34851pt.
-[9]
-Underfull \hbox (badness 10000) in paragraph at lines 722--722
-[]|$\OT1/cmr/m/n/8 +3[]784$
- []
-
-<figures/domain_randomization_ablation.png, id=464, 621.522pt x 419.166pt>
-File: figures/domain_randomization_ablation.png Graphic file (type png)
-<use figures/domain_randomization_ablation.png>
-Package pdftex.def Info: figures/domain_randomization_ablation.png  used on inp
-ut line 727.
-(pdftex.def)             Requested size: 252.0pt x 169.95317pt.
-
-Underfull \hbox (badness 1616) in paragraph at lines 730--730
-[]\OT1/ptm/m/n/10 Fig. 6. |Nom-i-nal Hy-brid MAD-DPG ver-sus the domain-
- []
+) (restored_system_model.tex
+<figures/Network architecture diagram.png, id=329, 3083.52pt x 1381.16pt>
+File: figures/Network architecture diagram.png Graphic file (type png)
+<use figures/Network architecture diagram.png>
+Package pdftex.def Info: figures/Network architecture diagram.png  used on inpu
+t line 44.
+(pdftex.def)             Requested size: 485.04126pt x 217.2388pt.
+<figures/Causal time-slot execution workflow.png, id=331, 3597.44pt x 1188.44pt
+>
+File: figures/Causal time-slot execution workflow.png Graphic file (type png)
+<use figures/Causal time-slot execution workflow.png>
+Package pdftex.def Info: figures/Causal time-slot execution workflow.png  used 
+on input line 48.
+(pdftex.def)             Requested size: 495.36346pt x 163.64221pt.
+<figures/End-to-end task lifecycle and queue mode.png, id=332, 3597.44pt x 1188
+.44pt>
+File: figures/End-to-end task lifecycle and queue mode.png Graphic file (type p
+ng)
+<use figures/End-to-end task lifecycle and queue mode.png>
+Package pdftex.def Info: figures/End-to-end task lifecycle and queue mode.png  
+used on input line 60.
+(pdftex.def)             Requested size: 495.36346pt x 163.64221pt.
+ [3]
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [10 <./figures/learning_curves_learned_methods.png>]
+ [4 <./figures/Network architecture diagram.png> <./figures/Causal time-slot ex
+ecution workflow.png>]
+Underfull \hbox (badness 3635) in paragraph at lines 197--198
+ \OT1/ptm/m/it/10 1) Vehicle-to-RSU Ter-res-trial Chan-nel Model: [][][] \OT1/p
+tm/m/n/10 For a
+ []
 
-LaTeX Warning: Text page 11 contains only floats.
+[5 <./figures/End-to-end task lifecycle and queue mode.png>]
+<figures/UAV energy, harvesting, and return-reserve model.png, id=387, 2922.92p
+t x 1445.4pt>
+File: figures/UAV energy, harvesting, and return-reserve model.png Graphic file
+ (type png)
+<use figures/UAV energy, harvesting, and return-reserve model.png>
+Package pdftex.def Info: figures/UAV energy, harvesting, and return-reserve mod
+el.png  used on input line 379.
+(pdftex.def)             Requested size: 485.04126pt x 239.84811pt.
+ [6] [7 <./figures/UAV energy, harvesting, and return-reserve model.png>] [8])
+Underfull \hbox (badness 1590) in paragraph at lines 710--222
+ \OT1/ptm/m/n/10 Con-straints (C13) and (C14) en-force the im-ple-mented
+ []
+
+(methodology_expanded.tex [9]
+<figures/Physical and virtual queue feedback diagram.png, id=472, 1573.88pt x 6
+74.52pt>
+File: figures/Physical and virtual queue feedback diagram.png Graphic file (typ
+e png)
+<use figures/Physical and virtual queue feedback diagram.png>
+Package pdftex.def Info: figures/Physical and virtual queue feedback diagram.pn
+g  used on input line 117.
+(pdftex.def)             Requested size: 485.04126pt x 207.87425pt.
+
+Underfull \hbox (badness 5274) in paragraph at lines 127--131
+[]\OT1/ptm/m/n/10 Fig. []5[] shows the com-plete centralized-training and
+ []
+
+<figures/Complete QA-DR-MADDPG architecture.png, id=474, 3276.24pt x 1316.92pt>
+
+File: figures/Complete QA-DR-MADDPG architecture.png Graphic file (type png)
+<use figures/Complete QA-DR-MADDPG architecture.png>
+Package pdftex.def Info: figures/Complete QA-DR-MADDPG architecture.png  used o
+n input line 134.
+(pdftex.def)             Requested size: 505.6778pt x 203.25642pt.
+<figures/Feasibility controller and safe-action workflow.png, id=475, 3083.52pt
+ x 1381.16pt>
+File: figures/Feasibility controller and safe-action workflow.png Graphic file 
+(type png)
+<use figures/Feasibility controller and safe-action workflow.png>
+Package pdftex.def Info: figures/Feasibility controller and safe-action workflo
+w.png  used on input line 204.
+(pdftex.def)             Requested size: 490.19843pt x 219.55702pt.
+[10]
+<figures/Domain-randomized training and deployment workflow.png, id=496, 3404.7
+2pt x 1252.68pt>
+File: figures/Domain-randomized training and deployment workflow.png Graphic fi
+le (type png)
+<use figures/Domain-randomized training and deployment workflow.png>
+Package pdftex.def Info: figures/Domain-randomized training and deployment work
+flow.png  used on input line 274.
+(pdftex.def)             Requested size: 505.6778pt x 186.0398pt.
+ [11 <./figures/Physical and virtual queue feedback diagram.png> <./figures/Com
+plete QA-DR-MADDPG architecture.png>]) [12 <./figures/Feasibility controller an
+d safe-action workflow.png> <./figures/Domain-randomized training and deploymen
+t workflow.png>]
+Underfull \hbox (badness 2529) in paragraph at lines 638--648
+[]\OT1/ptm/m/n/10 The com-par-i-son in-cludes nom-i-nal Hy-brid MAD-DPG,
+ []
 
 
-Overfull \vbox (6.36311pt too high) has occurred while \output is active []
+Underfull \hbox (badness 2846) in paragraph at lines 638--648
+\OT1/ptm/m/n/10 pro-posed QA-DR-MADDPG, Reptile-MADDPG, Reptile-
+ []
+
+<figures/learning_curves_learned_methods.png, id=525, 679.338pt x 462.528pt>
+File: figures/learning_curves_learned_methods.png Graphic file (type png)
+<use figures/learning_curves_learned_methods.png>
+Package pdftex.def Info: figures/learning_curves_learned_methods.png  used on i
+nput line 676.
+(pdftex.def)             Requested size: 490.19843pt x 333.76094pt.
+<figures/validation_reward_mean_all_methods.png, id=526, 607.068pt x 339.669pt>
+
+File: figures/validation_reward_mean_all_methods.png Graphic file (type png)
+<use figures/validation_reward_mean_all_methods.png>
+Package pdftex.def Info: figures/validation_reward_mean_all_methods.png  used o
+n input line 686.
+(pdftex.def)             Requested size: 454.08252pt x 254.06697pt.
+<figures/overall_learned_methods.png, id=529, 751.608pt x 476.982pt>
+File: figures/overall_learned_methods.png Graphic file (type png)
+<use figures/overall_learned_methods.png>
+Package pdftex.def Info: figures/overall_learned_methods.png  used on input lin
+e 724.
+(pdftex.def)             Requested size: 474.71906pt x 301.26445pt.
+[13]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [14 <./figures/learning_curves_learned_methods.png>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-LaTeX Warning: Text page 11 contains only floats.
+ [15 <./figures/validation_reward_mean_all_methods.png> <./figures/overall_lear
+ned_methods.png>]
+<figures/offered_load_sensitivity.png, id=573, 867.24pt x 274.626pt>
+File: figures/offered_load_sensitivity.png Graphic file (type png)
+<use figures/offered_load_sensitivity.png>
+Package pdftex.def Info: figures/offered_load_sensitivity.png  used on input li
+ne 770.
+(pdftex.def)             Requested size: 505.6778pt x 160.13383pt.
 
+Underfull \hbox (badness 10000) in paragraph at lines 809--809
+[]|$\OT1/cmr/m/n/8 +3[]784$
+ []
 
-Overfull \vbox (6.36311pt too high) has occurred while \output is active []
+<figures/domain_randomization_ablation.png, id=575, 621.522pt x 419.166pt>
+File: figures/domain_randomization_ablation.png Graphic file (type png)
+<use figures/domain_randomization_ablation.png>
+Package pdftex.def Info: figures/domain_randomization_ablation.png  used on inp
+ut line 814.
+(pdftex.def)             Requested size: 252.0pt x 169.95317pt.
 
-
-[11 <./figures/overall_learned_methods.png> <./figures/stress_completion_heatma
-p.png>]
-Underfull \hbox (badness 1796) in paragraph at lines 750--750
+Underfull \hbox (badness 1796) in paragraph at lines 837--837
 []\OT1/ptm/m/n/10 TABLE VIII: |Di-rect Physical-Queue-Weight Ab-la-tion of
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 767--767
+Underfull \hbox (badness 10000) in paragraph at lines 854--854
 []|$\OT1/cmr/m/n/8 +0\OML/cmm/m/it/8 :\OT1/cmr/m/n/8 162$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 767--767
+Underfull \hbox (badness 10000) in paragraph at lines 854--854
 []|$\OT1/cmr/m/n/8 +0\OML/cmm/m/it/8 :\OT1/cmr/m/n/8 314$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 767--767
+Underfull \hbox (badness 10000) in paragraph at lines 854--854
 []|$\OT1/cmr/m/n/8 +241[]982$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 767--767
+Underfull \hbox (badness 10000) in paragraph at lines 854--854
 []|$\OMS/cmsy/m/n/8 ^^@\OT1/cmr/m/n/8 467\OML/cmm/m/it/8 :\OT1/cmr/m/n/8 0$
  []
 
-<figures/queue_weight_ablation.png, id=484, 621.522pt x 419.166pt>
+<figures/queue_weight_ablation.png, id=579, 621.522pt x 419.166pt>
 File: figures/queue_weight_ablation.png Graphic file (type png)
 <use figures/queue_weight_ablation.png>
 Package pdftex.def Info: figures/queue_weight_ablation.png  used on input line 
-772.
+859.
 (pdftex.def)             Requested size: 252.0pt x 169.95317pt.
 
-Underfull \hbox (badness 4353) in paragraph at lines 776--776
-[]\OT1/ptm/m/n/10 Fig. 7. |Di-rect queue-weight ab-la-tion on the domain-
+Underfull \hbox (badness 2818) in paragraph at lines 863--863
+[]\OT1/ptm/m/n/10 Fig. 13. |Di-rect queue-weight ab-la-tion on the domain-
  []
 
-[12 <./figures/domain_randomization_ablation.png> <./figures/queue_weight_ablat
-ion.png>]
-Underfull \hbox (badness 3907) in paragraph at lines 873--875
+[16]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [17 <./figures/offered_load_sensitivity.png> <./figures/domain_randomization_a
+blation.png>]
+Underfull \hbox (badness 3907) in paragraph at lines 961--963
 []\OT1/ptm/m/n/8 J. Schul-man \OT1/ptm/m/it/8 et al.\OT1/ptm/m/n/8 , ``Prox-i-m
 al pol-icy op-ti-miza-tion al-go-rithms,''
  []
 
-[13] (main.aux)
+[18 <./figures/queue_weight_ablation.png>] (main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 28300189FDC561CD0DF67BC9CE1F3800;15067.
+(rerunfilecheck)             Checksum: 5EF6862DE878F8EE105D95C7230E7069;15303.
  ) 
 Here is how much of TeX's memory you used:
- 14763 strings out of 467867
- 241152 string characters out of 5418818
- 697322 words of memory out of 5000000
- 43255 multiletter control sequences out of 15000+600000
+ 14904 strings out of 467867
+ 246269 string characters out of 5418818
+ 700502 words of memory out of 5000000
+ 43352 multiletter control sequences out of 15000+600000
  677357 words of font info for 151 fonts, out of 8000000 for 9000
  1144 hyphenation exceptions out of 8191
- 75i,18n,83p,417b,625s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,18n,83p,599b,625s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/ASUS/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
 mbx10.pfb><C:/Users/ASUS/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
 nts/cm/cmex10.pfb><C:/Users/ASUS/AppData/Local/Programs/MiKTeX/fonts/type1/publ
@@ -784,9 +862,9 @@ s/utmb8a.pfb><C:/Users/ASUS/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times
 /utmbi8a.pfb><C:/Users/ASUS/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times
 /utmr8a.pfb><C:/Users/ASUS/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/
 utmri8a.pfb>
-Output written on main.pdf (13 pages, 1461886 bytes).
+Output written on main.pdf (18 pages, 27718079 bytes).
 PDF statistics:
- 653 PDF objects out of 1000 (max. 8388607)
- 184 named destinations out of 1000 (max. 500000)
- 527 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 764 PDF objects out of 1000 (max. 8388607)
+ 228 named destinations out of 1000 (max. 500000)
+ 575 words of extra memory for PDF output out of 10000 (max. 10000000)
 

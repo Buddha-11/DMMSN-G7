@@ -1,11 +1,11 @@
 \section{Proposed \method\ Methodology}
-The proposed controller has four interacting layers. A constrained Markov
-decision process defines the information and decisions available to each
-role. A Lyapunov construction turns physical and virtual queues into a common
-slot reward. Hybrid MADDPG learns the mixed routing, resource, and flight
-decisions, while a deterministic feasibility controller converts every neural
-proposal into an admissible executable action. Domain randomization trains
-one fixed policy over the declared operating family.
+The methodology connects four components. A constrained Markov decision
+process specifies what each role observes and controls. Physical and virtual
+queues determine a shared slot reward through the Lyapunov construction.
+Hybrid MADDPG uses this reward to learn routing, resource, and flight
+decisions, and a deterministic feasibility controller checks the resulting
+proposals before execution. Domain randomization exposes this policy to the
+declared operating family during training.
 
 \subsection{Constrained Markov Decision Process and Agent Roles}
 The controller is represented by
@@ -112,7 +112,33 @@ an ablation states otherwise. Large physical queues increase the value of
 service; a large virtual deficit increases the cost of net UAV energy. The
 trade-off weight $V$ balances immediate cost and backlog pressure.
 
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.94\textwidth]{Physical and virtual queue feedback diagram.png}
+\caption{Queue-aware Lyapunov feedback used by the common reward. Physical
+task queues and the virtual net-energy deficit enter the drift-plus-penalty
+score, whose negative is supplied to the cooperative controller. Executed
+decisions then determine queue service and energy expenditure in the next
+transition.}
+\label{fig:lyapunov_feedback}
+\end{figure*}
+
 \subsection{Hybrid MADDPG Decision Engine}
+Fig.~\ref{fig:controller_architecture} shows the complete centralized-training
+and decentralized-execution architecture. Role-shared actors create a joint
+hybrid proposal, the deterministic feasibility layer produces the executed
+action, and centralized critics learn from replay containing both versions.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.98\textwidth]{Complete QA-DR-MADDPG architecture.png}
+\caption{Complete \method\ architecture. Vehicle, RSU, and UAV actors use
+role-local observations at execution time, whereas centralized critics and
+the shared replay buffer are active only during training. The feasibility
+controller separates neural proposals from physically executed actions.}
+\label{fig:controller_architecture}
+\end{figure*}
+
 \subsubsection{Role-Shared Actors and Centralized Critics}
 For visible task feature $x_{hi}$ and mask $m_{hi}\in\{0,1\}$, the actor uses
 a task encoder and masked pooling,
@@ -173,6 +199,17 @@ admissible, the UAV disables new service and follows a verified return or
 landing contingency. Proposal/execution differences and repair frequencies
 are retained for evaluation.
 
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.95\textwidth]{Feasibility controller and safe-action workflow.png}
+\caption{Deterministic feasibility-controller workflow. A neural hybrid
+proposal is checked against routing, resource, queue-causality, motion,
+continuous-path separation, battery, and return-reserve constraints. The
+controller executes the nearest admissible repair or invokes a verified
+return or landing contingency.}
+\label{fig:feasibility_workflow}
+\end{figure*}
+
 \subsubsection{Critic, Actor, and Target Updates}
 Replay stores current/next states, role observations, masks, proposed and
 executed joint actions, reward, and done flag $d_b$. For minibatch size $B$,
@@ -232,6 +269,17 @@ copies or Reptile interpolation. Validation uses 35 disjoint specifications
 mean validation reward with zero modeled physical violations. Early stopping
 uses a patience of ten validations.
 
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.98\textwidth]{Domain-randomized training and deployment workflow.png}
+\caption{Domain-randomized training, validation, and deployment workflow.
+Seven stress classes update one common parameter set; disjoint validation
+selects an improved zero-violation checkpoint. Deployment freezes the chosen
+actors and disables centralized critics, replay sampling, and gradient
+updates.}
+\label{fig:dr_workflow}
+\end{figure*}
+
 \begin{algorithm}[!t]
 \caption{Queue-aware domain-randomized Hybrid MADDPG}
 \label{alg:dr_maddpg_new}
@@ -258,10 +306,11 @@ Initialize online/target actors, critics, and replay $\mathcal D$\;
 }
 \end{algorithm}
 
-During deployment, role-local actors and the deterministic feasibility
-controller execute once per slot. Centralized critics, replay sampling, and
-gradient updates are disabled. The reported evaluation therefore measures
-fixed-policy generalization, not online adaptation.
+At deployment, each slot requires a forward pass through the role-local
+actors followed by the deterministic feasibility controller. The selected
+parameters remain fixed: centralized critics, replay sampling, and gradient
+updates are disabled. Evaluation therefore measures how the trained policy
+generalizes across the test scenarios without online adaptation.
 
 \subsection{Computational and Storage Complexity}
 Let $n_g$, $d_g$, and $a_g$ denote the number of agents, observation width,
