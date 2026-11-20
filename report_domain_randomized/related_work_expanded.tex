@@ -1,127 +1,124 @@
 \section{Related Work}
-Four areas inform the controller developed here: UAV-assisted vehicular
-edge computing, queue-aware stochastic control, multi-agent reinforcement
-learning, and robust policy training. We organize the discussion around the
-capabilities each area contributes to the task-service and control problem.
+Four strands of earlier work are relevant here: UAV-assisted vehicular edge
+computing, queue-aware stochastic control, multi-agent reinforcement learning
+and robust policy training. We review each one with an eye on what it offers
+for task service and control in our setting.
 
 \subsection{UAV-Assisted MEC and End-to-End Task Service}
-UAV-mounted edge servers can shorten access distance and follow spatially
-varying demand, but their trajectory, radio service, computation, and energy
-budgets are coupled. Joint offloading, CPU control, wireless power delivery,
-and UAV motion have therefore been studied as one optimization problem
-\cite{liu2020uav,xiong2021energy}. Multi-UAV work further considers
-cooperative offloading and resource allocation under shared airspace and
-capacity constraints \cite{guo2024multi}, while recent vehicular MEC models
-use multi-agent policies for task partitioning and resource allocation
-\cite{liang2025rav}. These studies motivate joint control, but a task is often
-represented by a single delay expression or one-slot allocation.
+Putting an edge server on a UAV shortens the access distance and lets the
+server follow demand as it moves around, but it also ties the trajectory,
+radio service, computation and energy budget to one another. Joint
+formulations of offloading, CPU control, wireless power delivery and UAV
+motion deal with this coupling directly~\cite{liu2020uav,xiong2021energy}.
+With several UAVs, cooperative offloading and resource allocation must also
+respect shared airspace and capacity limits~\cite{guo2024multi}, and
+multi-agent policies have recently been used for task partitioning and
+resource allocation in vehicular MEC~\cite{liang2025rav}. These papers make a
+good case for joint control. Even so, they often describe a task by a single
+delay term or by an allocation that lasts one slot.
 
-Our model records the stages a task actually visits: ingress, radio upload,
-receive staging, edge computation, UAV--cloud backhaul, cloud computation,
-and branch synchronization. Retaining these stages makes it possible to
-account for waiting beyond the radio link. Tasks that miss their deadlines
-remain in the service model until completion or the end of the trace.
+Our model follows a task through the stages it actually visits (ingress,
+radio upload, receive staging, edge computation, UAV--cloud backhaul, cloud
+computation and branch synchronization), so waiting that happens after the
+radio link is counted. A task that misses its deadline is kept in the
+service model until it finishes or the trace ends.
 
 \subsection{Queue-Aware Vehicular Offloading and Lyapunov Control}
-Lyapunov optimization converts a long-horizon stochastic control problem into
-queue-weighted slot decisions when arrivals, service, and energy increments
-satisfy the required boundedness and feasibility conditions
-\cite{neely2010stochastic}. It has been applied to MEC offloading with energy
-harvesting \cite{mao2017dynamic}. Q-TOP combines physical queues with
-three-dimensional multi-UAV path planning for vehicular edge computing and
-uses a genetic optimizer for the resulting per-slot problem
-\cite{sun2026qtop}.
+Lyapunov optimization reduces a long-horizon stochastic control problem to
+queue-weighted decisions taken slot by slot, provided that arrivals, service
+and energy increments meet the boundedness and feasibility conditions it
+needs~\cite{neely2010stochastic}. Mao \emph{et al.} applied it to MEC
+offloading with energy-harvesting devices~\cite{mao2017dynamic}. For
+vehicular edge computing, Q-TOP couples physical queues with 3-D path
+planning for multiple UAVs and solves each per-slot problem with a genetic
+optimizer~\cite{sun2026qtop}.
 
-The proposed formulation retains this queue-sensitive structure but adds
-explicit transport, staging, backhaul, and cloud queues, task identities, and
-a virtual net-energy deficit. Moving work from one stage to another is not
-treated as completion: the drift term accounts for congestion at both the
-source and receiving queues.
+We keep the queue-weighted structure and extend it with explicit transport,
+staging, backhaul and cloud queues, per-task identities and a virtual
+net-energy deficit. Moving work on to the next stage does not count as
+finishing it, and the drift term registers congestion both at the queue the
+work leaves and at the one it enters.
 
 \subsection{Multi-Agent and Hybrid-Action Reinforcement Learning}
-MADDPG uses centralized critics during training and decentralized actors at
-execution, allowing agents with different observations to optimize a common
-objective \cite{lowe2017multi}. MAPPO provides an on-policy alternative with
-clipped policy updates \cite{schulman2017proximal}. Attention-based MAPPO has
-also been used to coordinate bounded UAV motion, task service, and energy
-transfer \cite{talukdar2026mappo}, while generative-policy extensions have
-been studied for UAV task assignment \cite{tang2025dnn}.
+MADDPG trains centralized critics but executes decentralized actors, which
+lets agents with different observations pursue one shared
+objective~\cite{lowe2017multi}. MAPPO is an on-policy alternative that keeps
+each policy update small through clipping~\cite{schulman2017proximal}. An
+attention-based MAPPO has been used to coordinate bounded UAV motion, task
+service and energy transfer~\cite{talukdar2026mappo}, and generative policies
+have been tried for UAV task assignment~\cite{tang2025dnn}.
 
-The action space considered here is mixed. Vehicles select a categorical
-hold or destination decision and a continuous partition fraction; RSUs and
-UAVs allocate continuous processor shares; and UAVs additionally choose CPU
-frequency and three-dimensional motion. The controller therefore combines
-masked straight-through categorical decisions, bounded continuous heads,
-and a deterministic feasibility layer. Neither MADDPG nor PPO alone supplies
-battery causality, queue stability, or collision avoidance.
+Our action space mixes discrete and continuous parts. A vehicle decides
+whether to hold a task or where to send it, and it also picks a continuous
+partition fraction. RSUs and UAVs set continuous processor shares, and UAVs
+additionally choose a CPU frequency and a 3-D motion. The controller copes
+with this through masked straight-through categorical outputs, bounded
+continuous heads and a deterministic feasibility layer. Neither MADDPG nor
+PPO gives battery causality, queue stability or collision avoidance on its
+own.
 
 \subsection{Meta-Learning and Robustness Across Operating Domains}
-MAML and Reptile learn an initialization intended to adapt with a small
-number of gradient updates \cite{finn2017model,nichol2018reptile}. Yan
-\emph{et al.} combine Reptile and MADDPG for computation allocation in a
-UAV/RSU/cloud MEC architecture \cite{yan2026rmaddpg}. Domain randomization
-addresses a different objective: one policy is optimized over a distribution
-of environments and then deployed without online parameter updates. This
-principle has been used to improve robustness to model variation in learned
-control \cite{tobin2017domain,peng2018sim}.
+MAML and Reptile learn an initialization that should adapt after a few
+gradient steps~\cite{finn2017model,nichol2018reptile}, and Yan \emph{et al.}
+combine Reptile with MADDPG for computation allocation in a UAV/RSU/cloud MEC
+system~\cite{yan2026rmaddpg}. Domain randomization has another aim. A single
+policy is optimized across a distribution of environments and then deployed
+with fixed parameters, an approach that has made learned controllers more
+robust to model variation~\cite{tobin2017domain,peng2018sim}.
 
-This distinction determines how our evaluation should be read. Training
-covers a declared family of load, harvesting, outage, and backhaul
-conditions. We then freeze the policy and evaluate it on disjoint stochastic
-traces drawn from that family. These experiments assess fixed-policy
-generalization; they do not establish few-shot adaptation or robustness to
-operating changes outside the specified family.
+This affects how our results should be read. Training covers a declared
+family of load, harvesting, outage and backhaul conditions, and the frozen
+policy is then tested on separate stochastic traces from the same family. The
+experiments therefore measure how a fixed policy generalizes. They do not
+demonstrate few-shot adaptation, nor robustness to operating changes outside
+that family.
 
 \subsection{Energy-Aware Flight and Safe Execution}
-UAV service decisions share a finite battery with propulsion, communication,
-and computation. Rotary-wing flight models therefore appear together with
-offloading and trajectory decisions in UAV-MEC studies
-\cite{liu2020uav,talukdar2026mappo}. Predictive UAV deployment also links
-position to demand and mobility energy \cite{zhang2019predictive}. In this
-work, immediate battery causality and a verified return/landing reserve are
-hard execution constraints, while a virtual deficit queue represents the
-declared long-run net-energy target. The safety controller checks complete
-slot trajectories, rather than relying on a reward penalty to prevent
-collision or battery exhaustion.
+Propulsion, communication and computation all draw on one finite battery, so
+UAV-MEC studies usually model rotary-wing flight together with the offloading
+and trajectory decisions~\cite{liu2020uav,talukdar2026mappo}. Work on
+predictive UAV deployment likewise links position to both demand and
+mobility energy~\cite{zhang2019predictive}. In our design, immediate battery
+causality and a verified return/landing reserve are hard execution
+constraints, and a virtual deficit queue tracks the declared long-run
+net-energy target. Collisions and battery exhaustion are prevented by having
+the safety controller check whole slot trajectories; we do not rely on a
+reward penalty for this.
 
 \subsection{Synthesis and Research Gap}
-Table~\ref{tab:positioning} relates these research streams to the design
-choices in this work. Although prior studies establish the individual value of
-mobile edge servers, Lyapunov queue control, multi-agent learning, robust
-training, and energy-aware flight, combining these ingredients is not a direct
-composition. A routing action changes the arrival process of a downstream
-queue; a processor or backhaul allocation changes both task delay and energy
-consumption; and UAV motion changes the future channel, propulsion demand, and
-return reserve. Treating any one of these effects outside the common state and
-transition model can transfer congestion or energy cost to a stage that the
-controller does not observe.
+Table~\ref{tab:positioning} sums up how these strands relate to our design.
+Mobile edge servers, Lyapunov queue control, multi-agent learning, robust
+training and energy-aware flight have each proved useful, but they do not
+simply stack on top of each other. Routing changes what arrives at a
+downstream queue. A processor or backhaul allocation changes delay and energy
+at once. UAV motion changes the future channel, the propulsion demand and the
+return reserve. If one of these effects is modeled outside the shared state
+and transition, congestion or energy cost can be pushed onto a stage that the
+controller never sees.
 
-Three specific gaps motivate the proposed framework. First, much of the
-offloading literature represents service through an instantaneous rate or an
-aggregate delay, which does not reveal where unfinished work waits after it is
-dispatched. An evaluation based on such a model may count assigned work as
-successful even when upload, computation, synchronization, or backhaul service
-remains incomplete. Second, standard MADDPG or MAPPO supplies a learning
-mechanism but does not by itself enforce processor capacity, battery causality,
-continuous-path separation, or a safe return reserve. Reward penalties alone
-cannot guarantee these constraints at execution. Third, a policy that performs
-well in a nominal simulator is not automatically reliable under load,
-harvesting, outage, or backhaul changes. Meta-learning addresses rapid
-adaptation, but it assumes that post-deployment data and gradient updates are
-available; that assumption does not match the zero-update deployment studied
-here.
+We see three gaps. First, a large part of the offloading literature describes
+service by an instantaneous rate or an aggregate delay. That hides where
+dispatched but unfinished work is waiting, and an evaluation built on it can
+count work as done while its upload, computation, synchronization or backhaul
+is still pending. Second, MADDPG and MAPPO provide a learning rule but do not
+enforce processor capacity, battery causality, continuous-path separation or
+a safe return reserve, and reward penalties cannot guarantee these at
+execution time. Third, a policy tuned in a nominal simulator may not stay
+reliable when load, harvesting, outages or backhaul change. Meta-learning
+targets fast adaptation, but it assumes that data and gradient updates are
+available after deployment, and our zero-update setting rules that out.
 
-Accordingly, the missing capability is a fixed multi-agent policy that observes
-end-to-end congestion, coordinates the mixed decisions of heterogeneous
-agents, respects hard physical constraints, and is trained and tested across a
-declared family of operating regimes. The proposed framework addresses this
-gap through persistent task-level queues, Lyapunov-derived physical and virtual
-queue signals, hybrid CTDE control, and a deterministic feasibility layer. Its
-evaluation freezes the trained actors and uses paired held-out traces so that
-differences between controllers are not caused by different traffic or channel
-realizations. This design supports a claim of robustness within the declared
-domain family; it does not claim guaranteed performance for arbitrary
-out-of-distribution conditions.
+What is needed is a fixed multi-agent policy that observes end-to-end
+congestion, coordinates heterogeneous agents with mixed actions, respects hard
+physical limits, and is trained and tested on a declared family of operating
+regimes. We address this with persistent task-level queues, physical and
+virtual queue signals derived from Lyapunov analysis, hybrid CTDE control and
+a deterministic feasibility layer. During evaluation the trained actors are
+frozen and run on paired held-out traces, so differences between controllers
+cannot come from different traffic or channel realizations. Our claim is
+accordingly limited to robustness within the declared domain family; we do
+not claim guaranteed performance under arbitrary out-of-distribution
+conditions.
 
 \begin{table*}[!t]
 \caption{Positioning of the Proposed Framework Relative to the Main Research Streams}
@@ -132,12 +129,12 @@ out-of-distribution conditions.
 \toprule
 Research stream & Established capability & Gap addressed in this work\\
 \midrule
-UAV-assisted MEC~\cite{liu2020uav,xiong2021energy,guo2024multi} & Joint offloading, computing, radio allocation, and trajectory-aware service & Explicit vehicle--RSU--UAV--cloud stage queues, task records, branch synchronization, and finite backhaul\\
-Queue-aware VEC~\cite{neely2010stochastic,mao2017dynamic,sun2026qtop} & Lyapunov-weighted offloading and UAV path planning & Transport and staging queues, weighted CPU sharing, censored unfinished tasks, and virtual net-energy accounting\\
-MADDPG/MAPPO~\cite{lowe2017multi,schulman2017proximal,talukdar2026mappo} & Coordinated deterministic or stochastic multi-agent policies & Masked categorical routing combined with continuous split, CPU, and flight actions\\
-Meta-RL~\cite{finn2017model,nichol2018reptile,yan2026rmaddpg} & Initialization for limited-update adaptation & Fixed zero-update deployment; no few-shot claim is assigned to the evaluated policy\\
-Domain randomization~\cite{tobin2017domain,peng2018sim} & Robust control over a declared parameter distribution & Paired held-out evaluation across traffic, harvesting, outage, and backhaul regimes\\
-Energy-aware UAV control~\cite{liu2020uav,talukdar2026mappo,zhang2019predictive} & Propulsion and computation energy models & Whole-system energy ledger, battery causality, collision avoidance, and verified return/landing reserve\\
+UAV-assisted MEC~\cite{liu2020uav,xiong2021energy,guo2024multi} & Joint optimization of offloading, computing, radio allocation, and trajectory-aware service & Stage queues along the vehicle--RSU--UAV--cloud path, per-task records, branch synchronization, and a finite backhaul\\
+Queue-aware VEC~\cite{neely2010stochastic,mao2017dynamic,sun2026qtop} & Offloading and UAV path planning weighted by Lyapunov queues & Transport and staging queues, weighted CPU sharing, censoring of unfinished tasks, and a virtual net-energy queue\\
+MADDPG/MAPPO~\cite{lowe2017multi,schulman2017proximal,talukdar2026mappo} & Coordinated multi-agent policies, deterministic or stochastic & Masked categorical routing together with continuous split, CPU, and flight actions\\
+Meta-RL~\cite{finn2017model,nichol2018reptile,yan2026rmaddpg} & An initialization that adapts with few updates & Deployment with fixed parameters and zero updates; the evaluated policy makes no few-shot claim\\
+Domain randomization~\cite{tobin2017domain,peng2018sim} & Robust control over a declared distribution of parameters & Paired held-out tests across traffic, harvesting, outage, and backhaul regimes\\
+Energy-aware UAV control~\cite{liu2020uav,talukdar2026mappo,zhang2019predictive} & Models of propulsion and computation energy & Energy ledger for the whole system, battery causality, collision avoidance, and a verified return/landing reserve\\
 \bottomrule
 \end{tabular}
 \end{table*}

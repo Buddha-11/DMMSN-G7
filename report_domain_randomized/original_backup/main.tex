@@ -1,0 +1,1019 @@
+\documentclass[journal]{IEEEtran}
+\usepackage{amsmath,amssymb,mathtools,mathrsfs}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{caption}
+\captionsetup[figure]{name={Fig.},labelsep=period}
+\graphicspath{{figures/}}
+\pagestyle{plain}
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\newcommand{\method}{QA-DR-MADDPG}
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\newcommand{\E}{\mathbb{E}}
+
+\begin{document}
+
+\title{Queue-Aware Domain-Randomized Hybrid MADDPG for Multi-UAV-Assisted Vehicular Edge Computing}
+
+\author{
+\begin{tabular}[t]{c}Arpit Anand\\IIT2023170\end{tabular}\quad
+\begin{tabular}[t]{c}Hridayesh\\IIT2023148\end{tabular}\quad
+\begin{tabular}[t]{c}Kinshuk\\IIT2023079\end{tabular}\quad
+\begin{tabular}[t]{c}Rahul Garg\\IIT2023173\end{tabular}\quad
+\begin{tabular}[t]{c}Anurag Sikarwar\\IIT2023242\end{tabular}
+}
+
+\maketitle
+
+\begin{abstract}
+Multi-UAV vehicular edge computing must coordinate offloading, radio service,
+computation, and flight while traffic demand, energy replenishment, and
+backhaul capacity vary. This work develops a queue-aware
+domain-randomized hybrid multi-agent deep deterministic policy-gradient
+(\method) framework for a vehicle--RSU--UAV--cloud network. Tasks remain in
+explicit transmission, computation, and backhaul queues until their required
+service is completed. Physical queues and virtual energy-deficit queues enter
+a Lyapunov drift-plus-penalty objective, while a feasibility controller
+enforces battery causality, return reserve, airspace boundaries, acceleration,
+and inter-UAV separation. The controller uses role-specific actors for mixed
+categorical and continuous decisions and centralized critics during training.
+Instead of meta-learning an initialization, the proposed training procedure
+samples seven declared operating conditions so that one fixed policy
+generalizes without online gradient updates. A frozen evaluation containing
+five independently trained learner seeds and 1,750 learned-controller test
+runs shows that domain
+randomization improves the numerical deadline-success rate from 22.2\% to
+41.5\% and completion from 77.9\% to 82.0\% relative to nominal Hybrid
+MADDPG. A separate 700-run direct ablation shows that physical-queue
+weighting increases throughput by 0.470 tasks/s and reduces final backlog by
+467.0 Gcycles, with paired 95\% confidence intervals excluding zero. All
+compared learned controllers satisfy the modeled battery,
+separation, and physical-feasibility constraints. The confidence intervals
+remain wide, so the results support improved numerical robustness rather than
+universal statistical superiority.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Vehicular edge computing, multi-UAV systems, domain randomization, MADDPG,
+task queues, Lyapunov optimization, energy-aware control.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Cooperative perception, localization and traffic analysis Need vehicles to perform computing tasks in short times.
+deadlines. The input data can be too large and the required The number of processor cycles is too large to obtain reliable local ex-
+The execution of each car. Vehicular edge computing (VEC)
+Overcomes this by enabling a task to be processed
+locally or transferred to a nearby edge or cloud server. Each
+However, destination has a different restriction. Local execution uses the vehicle's restricted processor
+and energy budget; roadside units (RSUs) provide stronger computing resources
+but only within their service regions; and cloud execution adds access and
+backhaul delay. Consequently, choosing a server only from its advertised CPU
+capacity or its instantaneous radio rate can move a task to a resource that is
+already congested~\cite{liu2020uav,liang2025rav}.
+
+UAV-mounted edge servers add mobile computing capacity where fixed
+infrastructure is sparse or temporarily overloaded. By changing altitude and
+horizontal position, a UAV can improve its communication link and approach a
+cluster of vehicles. Mobility is not free, however. Propulsion normally forms
+a substantial part of the UAV energy expenditure, while reception, backhaul
+transmission, and onboard computation draw energy from the same finite battery
+\cite{liu2020uav,talukdar2026mappo}. A trajectory that improves the current
+uplink may therefore reduce the energy available for later task service or
+leave insufficient reserve for a safe return. Offloading, processor
+allocation, backhaul use, and three-dimensional flight must thus be decided
+together rather than as independent subproblems.
+
+The service process is also inherently multi-stage. A dispatched task is not
+completed as soon as an offloading decision is made: its data may wait for
+wireless upload, enter a receive buffer, wait again for CPU service, and, for
+the cloud branch, traverse a capacity-limited UAV backhaul before cloud
+execution. Work can remain in any of these stages for several time slots.
+Ignoring this unfinished work hides congestion and can produce optimistic
+latency estimates. We therefore preserve task identities and explicitly track
+the physical queues along the vehicle--RSU--UAV--cloud path. This representation
+also allows deadline satisfaction, completed workload, residual backlog, and
+end-to-end delay to be measured from actual task progress rather than from a
+one-slot rate expression.
+
+A second difficulty is distribution shift. A policy trained only at one load
+level may encounter an unfamiliar queue regime during a traffic surge. A
+controller trained with nominal harvesting may behave poorly during an
+energy outage, and a policy that relies on cloud forwarding may fail under a
+backhaul bottleneck. Training a separate controller for every possible regime
+would require advance knowledge of the regime and a reliable mechanism for
+selecting or adapting a model online. Domain randomization instead exposes one
+policy to a declared distribution of operating conditions during training
+\cite{tobin2017domain,peng2018sim}. The learned actors must associate their
+observed queue, channel, battery, and mobility state with an appropriate action
+across that distribution. Unlike few-shot meta-learning, this design does not
+require gradient updates after deployment; robustness is expressed through
+the state-conditioned actions of fixed actors.
+
+Distance alone is insufficient for choosing an offloading destination. A
+nearby UAV may already have substantial work waiting for upload, computation,
+or backhaul service. We retain these unfinished tasks in physical queues and
+track net energy expenditure through virtual energy-deficit queues. Their
+contributions to a Lyapunov drift-plus-penalty objective provide congestion
+and energy signals for the hybrid MADDPG controller. The physical feasibility
+layer then projects the learned decisions onto the instantaneous radio,
+processor, battery, motion, separation, and return-reserve constraints. In
+this way, learning selects coordinated actions while model-based checks prevent
+an exploratory or deployed action from violating the declared hard limits.
+
+These coupled requirements create a hybrid multi-agent control problem.
+Vehicle agents make categorical routing choices and continuous workload-split
+decisions; RSUs and UAVs allocate continuous processing shares; and each UAV
+also selects processor frequency and a three-dimensional velocity. The effect
+of one agent's action depends on the others because they share service
+capacity, airspace, backhaul resources, and a common task-completion objective.
+We consequently use centralized training with decentralized execution (CTDE):
+centralized critics learn from the joint system transition, whereas the actors
+need only their permitted observations when the trained controller is used
+\cite{lowe2017multi}.
+
+The main contributions are as follows.
+\begin{itemize}
+  \item We formulate an end-to-end vehicle--RSU--UAV--cloud model with
+  persistent upload, computation, UAV backhaul, and cloud queues, explicit
+  task deadlines, three-dimensional UAV motion, harvesting, battery
+  causality, and verified return reserve.
+  \item We develop \method, a CTDE controller with role-specific actors for
+  categorical dispatch and continuous CPU, workload-partition, and flight
+  decisions. Physical and virtual queue terms enter the common reward.
+  \item We train one policy over seven declared operating conditions: low load,
+  near-capacity load, overload, zero harvesting, harvesting outage, backhaul
+  bottleneck, and traffic surge. Training, validation, and test seeds are
+  disjoint.
+  \item We report learning, service, energy, safety, latency, stress, and
+  domain-randomization ablation evidence over five independent learner seeds,
+  together with a direct queue-weight ablation using separately trained
+  checkpoints. Claims are tied to paired test scenarios and their confidence
+  intervals.
+\end{itemize}
+
+The remainder of the paper follows the structure commonly used in
+multi-agent UAV control studies. Section~II reviews related work.
+Section~III develops the system model, and Section~IV states the long-term
+optimization problem. Section~V presents the MDP, \method, training
+algorithm, and complexity. Section~VI reports numerical results, and
+Section~VII concludes the paper.
+
+\input{related_work_expanded.tex}
+\iffalse
+\section{Related Work}
+\subsection{UAV-Assisted Vehicular Edge Computing}
+UAV-assisted MEC combines aerial mobility with nearby computation. Existing
+studies jointly optimize placement, trajectory, radio allocation, and task
+offloading to reduce latency or energy~\cite{zhang2019mobile,liu2020uav}.
+These models establish the value of mobile servers but often represent a task
+as a one-slot allocation. The present work instead retains partially uploaded,
+partially computed, and forwarded work across slot boundaries.
+
+\subsection{Queue-Aware and Lyapunov Control}
+Lyapunov optimization converts long-term stochastic constraints into online
+decisions weighted by current physical and virtual queues~\cite{neely2010stochastic,mao2017dynamic}.
+Q-TOP applies queue-aware offloading and three-dimensional UAV path planning
+to vehicular computing and solves a per-slot problem with a genetic
+optimizer~\cite{sun2026qtop}. We retain the queue-aware drift structure but
+use a learned multi-agent controller and additionally model transmission and
+backhaul stages.
+
+\subsection{Multi-Agent Deep Reinforcement Learning}
+MADDPG uses centralized critics during training and decentralized actors at
+execution~\cite{lowe2017multi}. This is attractive when vehicles, RSUs, and
+UAVs have different local observations but coupled rewards. The present
+action space is hybrid: dispatch decisions are categorical, whereas CPU
+frequency, task shares, and velocity are continuous. We use masked
+straight-through categorical actions together with bounded continuous heads
+and a physical feasibility layer.
+
+MAPPO uses a clipped on-policy objective and has been applied to coordinated
+UAV scheduling~\cite{schulman2017proximal}. The supplied BA-MAPPO study
+organizes its methodology as an MDP, a CTDE decision engine, a training
+phase, and a complexity analysis~\cite{talukdar2026mappo}. We follow this
+presentation pattern while retaining the off-policy deterministic learner
+implemented by the current project.
+
+\subsection{Robustness Across Operating Domains}
+Meta-learning methods such as MAML and Reptile learn an initialization meant
+to adapt through a small number of updates~\cite{finn2017model,nichol2018reptile}.
+Yan et al. combine Reptile and MADDPG for UAV-assisted MEC~\cite{yan2026rmaddpg}.
+Domain randomization solves a different problem: it optimizes one fixed policy
+over a distribution of environment parameters. This removes online update
+cost and directly matches the zero-update deployment considered here.
+
+\subsection{Research Gap}
+Prior components do not alone provide a controller that simultaneously
+handles persistent multi-stage queues, hybrid actions, energy harvesting,
+flight safety, and held-out operating-domain shifts. \method combines these
+elements and evaluates them under paired, reproducible scenarios. The study
+does not assume that randomization proves robustness outside its declared
+domain family.
+\fi
+
+\input{restored_system_model.tex}
+
+% The shorter first-draft model is retained temporarily as source history but
+% disabled. The compiled report uses restored_system_model.tex above.
+\iffalse
+\section{System Model and Problem Formulation}
+\subsection{Network and Time-Slot Model}
+Consider vehicles $\mathcal V$, RSUs $\mathcal R$, MEC-enabled UAVs
+$\mathcal U$, and one cloud server. Time is divided into slots
+$t\in\{0,\ldots,T-1\}$ of duration $\Delta$. Vehicle $v$ has processor
+frequency $f_v^{\max}$, RSU $r$ has $f_r^{\max}$, UAV $u$ has
+$f_u^{\max}$, and the cloud has $f_c^{\max}$. UAV $u$ occupies
+$\vect p_u(t)=[x_u(t),y_u(t),h_u(t)]^\mathsf T$ and vehicle $v$ occupies
+$\vect w_v(t)=[x_v(t),y_v(t),0]^\mathsf T$.
+
+The UAV kinematics are
+\begin{align}
+\vect p_u(t+1)&=\vect p_u(t)+\Delta\vect v_u(t),\\
+\|\vect v_{u,xy}(t)\|_2&\le v_{xy}^{\max},\qquad
+-v_d^{\max}\le v_{u,z}(t)\le v_c^{\max}.
+\end{align}
+Position, altitude, acceleration, and pairwise-separation constraints require
+\begin{align}
+\vect p_u(t)&\in\mathcal P,\\
+\|\vect v_u(t)-\vect v_u(t-1)\|_2&\le a^{\max}\Delta,\\
+\|\vect p_u(t)-\vect p_j(t)\|_2&\ge d^{\min},\quad u\ne j.
+\end{align}
+
+\subsection{Task Generation, Routing, and Deadlines}
+A task $k$ arriving at vehicle $v_k$ is
+\begin{equation}
+\mathcal J_k=(a_k,D_k,C_k,L_k,\chi_k),
+\end{equation}
+where $a_k$ is its arrival slot, $D_k$ is input size in bits, $C_k$ is
+required CPU cycles, $L_k$ is the deadline, and $\chi_k$ indicates whether
+the workload is partitionable. The destination variable
+\begin{equation}
+z_k(t)\in\{\text{wait},\text{local},r\in\mathcal R,u\in\mathcal U\}
+\end{equation}
+selects waiting, local execution, or offloading. If a partitionable task is
+uploaded to UAV $u$, fraction $\rho_{k,u}(t)\in[0,1]$ is assigned to the UAV
+and the remainder is forwarded to the cloud. Non-partitionable work uses a
+binary effective fraction.
+
+Completion time is the first slot boundary at which all required upload,
+computation, backhaul, and cloud stages finish. Task $k$ is on time if
+\begin{equation}
+t_k^{\mathrm{done}}\Delta-a_k\Delta\le L_k.
+\end{equation}
+Expired work is not silently discarded: it remains in the physical queues so
+that overload and late completion remain observable.
+
+\subsection{Wireless Communication Model}
+For vehicle $v$ and UAV $u$, distance and elevation are
+\begin{align}
+d_{v,u}(t)&=\|\vect w_v(t)-\vect p_u(t)\|_2,\\
+\theta_{v,u}(t)&=\frac{180}{\pi}\sin^{-1}
+\left(\frac{h_u(t)}{d_{v,u}(t)}\right).
+\end{align}
+The line-of-sight probability is
+\begin{equation}
+P_{v,u}^{\mathrm{LoS}}(t)=
+\frac{1}{1+a\exp[-b(\theta_{v,u}(t)-a)]},
+\end{equation}
+and the mean air-to-ground path loss combines LoS and NLoS excess losses.
+Terrestrial vehicle--RSU links use a distance-dependent path-loss and fading
+model. For link $\ell$ allocated bandwidth $W_\ell(t)$, power $P_\ell(t)$,
+gain $g_\ell(t)$, noise density $N_0$, and interference $I_\ell(t)$,
+\begin{equation}
+R_\ell(t)=W_\ell(t)\log_2\left(1+
+\frac{P_\ell(t)g_\ell(t)}{N_0W_\ell(t)+I_\ell(t)}\right).
+\end{equation}
+Each access node satisfies $\sum_{\ell\in\mathcal H_n}W_\ell(t)\le
+W_n^{\max}$. Every learned controller uses the same deterministic radio
+scheduler so that policy comparisons isolate control rather than spectrum
+implementation.
+
+\subsection{Persistent Multi-Stage Queue Model}
+Let $Q_q(t)$ denote workload in queue $q$ at the beginning of slot $t$.
+Queues represent vehicle upload, RSU/UAV computation, UAV backhaul, and cloud
+computation stages. With admitted work $A_q(t)$, service capacity $\mu_q(t)$,
+and routed inflow $I_q(t)$ from an upstream stage,
+\begin{equation}
+Q_q(t+1)=\big[Q_q(t)-\mu_q(t)\big]^+ + A_q(t)+I_q(t).
+\label{eq:queue}
+\end{equation}
+Transmission service is at most $R_\ell(t)\Delta$ bits. Processor $n$ can
+serve at most $f_n(t)\Delta$ cycles. Positive allocation weights $w_{k,n}(t)$
+produce weighted processor sharing
+\begin{equation}
+\mu_{k,n}(t)=f_n(t)\Delta
+\frac{w_{k,n}(t)}{\sum_{j\in\mathcal K_n(t)}w_{j,n}(t)},
+\end{equation}
+bounded by the remaining cycles of task $k$. UAV-to-cloud forwarding is
+limited by $C_u^{\mathrm{bh}}(t)\Delta$ bits, and cloud service is finite.
+
+Mean-rate queue stability requires
+\begin{equation}
+\limsup_{T\to\infty}\frac{1}{T}\sum_{t=0}^{T-1}
+\E[Q_q(t)]<\infty,\qquad \forall q.
+\end{equation}
+An overloaded domain may violate this condition for every controller; such a
+case is reported rather than removed.
+
+\subsection{Energy Consumption Model}
+The rotary-wing propulsion power at horizontal speed $v$ is
+\begin{align}
+P_u^{\mathrm{fly}}(v)=&P_0\left(1+\frac{3v^2}{U_{\mathrm{tip}}^2}\right)
++\frac{1}{2}d_0\rho_a sA v^3\nonumber\\
+&+P_i\left(\sqrt{1+\frac{v^4}{4v_0^4}}
+-\frac{v^2}{2v_0^2}\right)^{1/2}.
+\end{align}
+At $v=0$, this gives hovering power $P_u^{\mathrm{hov}}=P_0+P_i$.
+Vertical corrections account for ascent and descent. Propulsion energy over
+one airborne slot is $E_u^{\mathrm{prop}}(t)=\Delta P_u^{\mathrm{fly}}(t)$.
+
+Dynamic computation energy at node $n$ is
+\begin{equation}
+E_n^{\mathrm{cpu}}(t)=\kappa_n f_n^3(t)\tau_n(t),
+\end{equation}
+where $\tau_n(t)\le\Delta$ is active processing time. Transmission and
+reception energy are
+\begin{align}
+E_n^{\mathrm{tx}}(t)&=P_n^{\mathrm{tx}}\tau_n^{\mathrm{tx}}(t),\\
+E_n^{\mathrm{rx}}(t)&=P_n^{\mathrm{rx}}\tau_n^{\mathrm{rx}}(t).
+\end{align}
+UAV backhaul and flight-control electronics contribute analogous terms. The
+total system energy is the sum over vehicles, RSUs, UAVs, and cloud.
+
+\subsection{Harvesting, Battery, and Return Reserve}
+Let $B_u(t)$ be UAV charge, $H_u(t)$ harvested energy, and $E_u(t)$ executed
+expenditure. Battery evolution is
+\begin{equation}
+B_u(t+1)=\min\{B_u^{\max},B_u(t)-E_u(t)+H_u(t)\}.
+\end{equation}
+Energy causality requires $0\le E_u(t)\le B_u(t)$. The controller also
+computes verified return energy $E_u^{\mathrm{return}}(t+1)$ from the proposed
+end state and enforces
+\begin{equation}
+B_u(t)-E_u(t)\ge E_u^{\mathrm{return}}(t+1)+B_u^{\mathrm{safe}}.
+\label{eq:reserve}
+\end{equation}
+If normal service violates~\eqref{eq:reserve}, the UAV returns, lands, and is
+removed from service destinations.
+
+\subsection{Long-Term Optimization Problem}
+Let $D(t)$ denote deadline penalties, $Q(t)=\sum_q Q_q(t)$ total physical
+backlog, and $E^{\mathrm{sys}}(t)$ system energy. The instantaneous cost is
+\begin{equation}
+G(t)=\omega_DD(t)+\omega_Q\widehat Q(t)+
+\omega_E\widehat E^{\mathrm{sys}}(t)+\omega_RR(t),
+\end{equation}
+where hats denote fixed normalizations and $R(t)$ is action-repair cost. The
+objective is
+\begin{align}
+\textbf{P1:}\quad
+\min_{\pi}\;&\limsup_{T\to\infty}\frac{1}{T}
+\sum_{t=0}^{T-1}\E_\pi[G(t)]\\
+\text{s.t. }&\text{queue, radio, CPU, and motion constraints,}\\
+&\text{battery causality and return reserve,}\\
+&\text{airspace and separation constraints.}
+\end{align}
+
+\fi
+\input{methodology_expanded.tex}
+\iffalse
+\section{Proposed \method\ Methodology}
+\subsection{Constrained Markov Decision Process}
+We formulate the controller as
+$\langle\mathcal S,\mathcal A,\mathcal P,\mathcal R,\gamma\rangle$.
+
+\subsubsection{State and Observations}
+The centralized state $s_t$ contains vehicle/UAV positions, UAV velocities
+and modes, all physical queues, task ages and remaining stages, channel
+features, CPU availability, battery fractions, return reserves, virtual
+energy queues, harvesting state, and normalized time. Actor $i$ observes only
+the role-relevant projection $o_i(t)$, preserving centralized training and
+decentralized execution (CTDE).
+
+\subsubsection{Hybrid Action Space}
+Vehicle actors choose a masked destination and, where allowed, a partition
+fraction. RSU and UAV actors produce processor-sharing weights. UAV actors
+also produce CPU frequency and three-dimensional velocity. The joint proposal
+is
+\begin{equation}
+\vect a_t=\{\vect a_v^{\mathrm{route}},\vect a_r^{\mathrm{cpu}},
+\vect a_u^{\mathrm{cpu}},\vect a_u^{\mathrm{flight}}\}.
+\end{equation}
+Categorical logits use a straight-through one-hot estimator during training;
+continuous values use bounded output transformations.
+
+\subsubsection{Transition and Reward}
+The transition includes task arrivals, mobility, radio and computation
+service, queue updates, battery expenditure, harvesting, and safety-state
+changes. A common reward is
+\begin{equation}
+r_t=-G_{\mathrm{DPP}}(t),
+\end{equation}
+where $G_{\mathrm{DPP}}(t)$ is the normalized drift-plus-penalty score derived
+below. Reward uses executed rather than proposed actions.
+
+\subsection{Lyapunov Queue and Energy Transformation}
+For long-term target $\bar E_u$, define a virtual deficit queue
+\begin{equation}
+Z_u(t+1)=\big[Z_u(t)+E_u(t)-\bar E_u\big]^+.
+\end{equation}
+Using physical and virtual queues, choose
+\begin{equation}
+L(t)=\frac{1}{2}\left(\sum_q Q_q^2(t)+\sum_u Z_u^2(t)\right).
+\end{equation}
+The conditional drift is
+$\Delta(t)=\E[L(t+1)-L(t)\mid s_t]$. After applying
+$([x-y]^++z)^2\le x^2+y^2+z^2+2x(z-y)$, an upper bound has the control-dependent
+form
+\begin{align}
+\Psi(t)=&\sum_q Q_q(t)
+\big(A_q(t)+I_q(t)-\mu_q(t)\big)\nonumber\\
+&+\sum_u Z_u(t)\big(E_u(t)-\bar E_u\big)+VP(t),\\
+\Delta(t)+V\E[P(t)\mid s_t]
+\le&\ C+\E[\Psi(t)\mid s_t].
+\label{eq:dpp}
+\end{align}
+The quantity $\Psi(t)$ defines $G_{\mathrm{DPP}}(t)$. Large physical queues
+increase the value of service, whereas a large virtual deficit increases the
+cost of UAV energy. $V$ controls the delay--energy trade-off.
+
+\subsection{Hybrid MADDPG Decision Engine}
+For role $g$, actor $\mu_{\theta_g}$ maps local observation and action masks
+to a proposal. A centralized critic
+$Q_{\psi_g}(s,\vect a)$ observes the joint state and joint executed action.
+Target networks generate the temporal-difference target
+\begin{equation}
+y_g=r+\gamma(1-d)Q_{\psi_g^-}
+\left(s',\vect a'\right),
+\end{equation}
+where $d$ marks termination or truncation and $\vect a'$ is repaired by the
+tensor-level action map. Critic loss is
+\begin{equation}
+\mathcal L_g(\psi_g)=\frac{1}{B}\sum_{b=1}^B
+\left(Q_{\psi_g}(s_b,\vect a_b^{\mathrm{exec}})-y_{g,b}\right)^2.
+\end{equation}
+The deterministic actor update is
+\begin{equation}
+\nabla_{\theta_g}J_g\approx\frac{1}{B}\sum_{b=1}^B
+\nabla_{a_g}Q_{\psi_g}(s_b,\vect a_b)
+\nabla_{\theta_g}\mu_{\theta_g}(o_{g,b}).
+\end{equation}
+Target parameters use Polyak averaging
+\begin{equation}
+\theta_g^-\leftarrow\tau\theta_g+(1-\tau)\theta_g^-,\qquad
+\psi_g^-\leftarrow\tau\psi_g+(1-\tau)\psi_g^-.
+\end{equation}
+
+\subsection{Feasibility Controller}
+Before execution, the controller masks unavailable destinations, normalizes
+processor shares, clamps frequencies, projects motion into the admissible
+flight region, searches collision-free joint motion candidates, and checks
+battery and verified return reserve. The environment recomputes service and
+energy from the repaired action. Replay stores both proposed and executed
+actions so that the critic learns the actual transition. All learned methods
+use the same feasibility controller.
+
+\subsection{Domain-Randomized Training Phase}
+A domain
+\begin{equation}
+\omega=(\lambda,\mathcal C,H,C^{\mathrm{bh}},\mathcal M)
+\end{equation}
+contains offered-load statistics $\lambda$, channel conditions $\mathcal C$,
+harvesting process $H$, backhaul capacity $C^{\mathrm{bh}}$, and mobility/task
+trace $\mathcal M$. At each episode,
+\begin{equation}
+\omega_e\sim p_{\mathrm{train}}(\omega).
+\end{equation}
+The robust objective is
+\begin{equation}
+\max_\Theta\;\E_{\omega\sim p_{\mathrm{train}}}
+\E_{\tau\sim\pi_\Theta,\omega}
+\left[\sum_{t=0}^{T-1}\gamma^tr_t\right].
+\label{eq:dr_objective}
+\end{equation}
+Unlike Reptile, all episodes update the same parameters $\Theta$; there are no
+task-specific copies or outer parameter interpolation. Validation uses
+disjoint seeds and selects only checkpoints with zero modeled physical
+violations.
+
+\begin{algorithm}[!t]
+\caption{Queue-aware domain-randomized Hybrid MADDPG}
+\label{alg:dr_maddpg}
+\KwIn{Training-domain distribution $p_{\mathrm{train}}$, replay capacity
+$N$, batch size $B$, update rate $\tau$}
+\KwOut{Validation-selected policy parameters $\Theta^*$}
+Initialize online and target actors/critics and replay $\mathcal D$\;
+\For{each training epoch}{
+  sample scenarios $\omega_e\sim p_{\mathrm{train}}(\omega)$\;
+  \For{each slot $t$ in each sampled scenario}{
+    observe $s_t$ and role observations $\{o_i(t)\}$\;
+    generate masked hybrid proposal $\vect a_t$ with exploration\;
+    execute $\vect a_t^{\mathrm{exec}}=\mathcal H(s_t,\vect a_t)$\;
+    observe $r_t,s_{t+1}$ and store transition in $\mathcal D$\;
+    \If{$|\mathcal D|\ge B$}{
+      sample a minibatch and update centralized critics\;
+      update role actors through the critics\;
+      Polyak-update all target networks\;
+    }
+  }
+  evaluate on fixed validation scenarios\;
+  retain a checkpoint only if it improves reward and remains feasible\;
+}
+\end{algorithm}
+
+\subsection{Execution and Complexity Analysis}
+At deployment, only decentralized actors and the deterministic feasibility
+controller execute. No online gradients are required. For an $L$-layer MLP
+with widths $h_0,\ldots,h_L$, forward complexity is
+\begin{equation}
+C_{\mathrm{MLP}}=\mathcal O\left(\sum_{\ell=1}^{L}h_{\ell-1}h_\ell\right).
+\end{equation}
+With $G$ role actors, $G$ critics, batch size $B$, $U$ updates per slot,
+$E$ episodes, and $T$ slots, training complexity is
+\begin{equation}
+\mathcal O\left(ET\left[C_{\mathrm{env}}+UB
+\left(C_{\mathrm{actor}}+C_{\mathrm{critic}}\right)\right]\right).
+\end{equation}
+Replay storage is $\mathcal O(Nd_{\mathrm{tr}})$ for transition width
+$d_{\mathrm{tr}}$. Domain randomization changes scenario generation but does
+not add a Reptile inner/outer loop.
+\fi
+
+\section{Numerical Results}
+\subsection{Simulation Configuration}
+The frozen research-v1 study uses Tables~\ref{tab:sim}--\ref{tab:domains}.
+Scenario-generation seeds are $0$--$9$ for training, $100$--$104$ for
+validation, and $200$--$209$ for testing; learner seeds are $0$--$4$. The
+test split contains seven stress classes and ten paired scenario traces per
+class. Five learned methods therefore contribute
+$5\times5\times70=1{,}750$ runs to the comparisons reported here. The complete
+archival evaluation contains 3,150 runs because it also exercised four
+non-learning integration baselines outside the learned-controller scope.
+
+The reported benchmark uses static synthetic vehicle positions and fixed
+per-node uplink capacities. The geometry-aware channel and recorded-mobility
+interfaces specified in Section~III are supported by the simulator but are
+not activated in these numerical results. Consequently, the evidence below
+supports robustness to the declared traffic, harvesting, outage, backhaul,
+and stochastic-trace variations; it does not establish robustness to channel
+or mobility shifts.
+
+\begin{table*}[!t]
+\caption{Physical, Workload, and Energy Parameters of the Reported Benchmark}
+\label{tab:sim}
+\centering
+\footnotesize
+\begin{tabular}{p{0.22\textwidth}p{0.21\textwidth}p{0.22\textwidth}p{0.21\textwidth}}
+\toprule
+Parameter & Value & Parameter & Value\\
+\midrule
+Area; slot duration & $1000\times1000$ m$^2$; 1 s & Vehicles; RSUs; UAVs & 3; 2; 2\\
+Offered-load/drain horizon & 200/100 slots & Vehicle CPU & $0.5$ GHz each\\
+RSU/UAV/cloud CPU & $3/2/12$ GHz & RSU/UAV uplink & $20/12$ Mbit/s each\\
+Nominal/bottleneck backhaul & $20/0.5$ Mbit/s & UAV altitude; speed & 50--150 m; 20 m/s\\
+Climb/descent; acceleration & 5/5 m/s; 10 m/s$^2$ & Minimum separation & 50 m\\
+Battery capacity/initial charge & 50/45 kJ & Mean harvest & 140 J/slot, $\pm20\%$\\
+Task input; CPU cycles & 2--6 Mbit; 3.2--4.8 Gcycle & Deadline; partitionable ratio & 8--20 s; 0.5\\
+Blade/induced hover power & 79.86/88.63 W & Rotor-tip/induced speed & 120/4.03 m/s\\
+UAV compute coefficient $\kappa$ & $10^{-28}$ & UAV RX/BH/control power & 2/5/1 W\\
+Vehicle transmit power & 0.4 W & Queue/energy reference & $10^9$ cycles/$10^3$ J\\
+Lyapunov $V,w_Q,w_Z$ & 1, 1, 1 & Maximum visible tasks & 16 per actor\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[!t]
+\caption{Learning Configuration}
+\label{tab:learning_config}
+\centering
+\footnotesize
+\begin{tabular}{p{0.48\columnwidth}p{0.40\columnwidth}}
+\toprule
+Parameter & Value\\
+\midrule
+Actor/critic hidden width & 128/256\\
+Actor/critic learning rate & $10^{-3}/10^{-3}$\\
+Discount/Polyak rate & 0.99/0.01\\
+Batch/replay/warm-up & 64/$10^5$/64\\
+Gradient updates per slot & 1 after warm-up\\
+Exploration standard deviation/decay & 0.15/0.995\\
+Scenarios sampled per epoch & 7 of 70 train specifications\\
+Validation specifications & 35 per validation\\
+Maximum epochs/early-stop patience & 50/10 validations\\
+Independent learner seeds & 5\\
+Training device & CPU\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!t]
+\caption{Declared Domain Conditions}
+\label{tab:domains}
+\centering
+\footnotesize
+\begin{tabular}{p{0.34\columnwidth}p{0.56\columnwidth}}
+\toprule
+Condition & Parameterization\\
+\midrule
+Low load & Offered-load ratio 0.35\\
+Near capacity & Offered-load ratio 0.85\\
+Overload & Offered-load ratio 1.25\\
+Zero harvest & $H_u(t)=0$ for all slots\\
+Harvest outage & 140 J mean except slots 66--132\\
+Backhaul bottleneck & $C^{\rm bh}=0.5$ Mbit/s\\
+Traffic surge & Load ratio 0.35 to 1.25 at slot 100\\
+Nominal conditions & 20 Mbit/s backhaul; 140 J mean harvest\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Compared Learned Controllers and Metrics}
+The comparison includes nominal Hybrid MADDPG, proposed \method,
+Reptile-MADDPG, Reptile-MADDPG without physical-queue weighting, and Hybrid
+MAPPO. This learned-controller comparison isolates training and policy-family
+effects without assigning policy quality to a handcrafted heuristic. Deadline
+success is the fraction of admitted tasks completed before their relative
+deadline; completion includes late tasks; throughput is completed tasks per
+second; final backlog is measured after the 100-slot drain; reward is summed
+over the complete trace; and system energy counts each ownership component
+once. Controller latency, action repair, and physical violations are reported
+separately.
+
+For statistical analysis, we first average the paired test scenarios for
+each independently trained learner seed. These five seed-level observations
+form the basis of the reported 95\% Student-$t$ intervals. Evaluating a
+checkpoint on additional traces does not increase the number of independent
+training repetitions.
+
+The direct queue-weight ablation is a separate focused experiment. It trains
+the domain-randomized controller with and without physical-queue weighting
+under the same five learner seeds, then evaluates each checkpoint on 70 paired
+test specifications. This produces $2\times5\times70=700$ frozen test runs.
+Because these checkpoints were retrained independently of the full benchmark,
+the ablation is interpreted through within-study paired differences rather
+than by mixing its absolute means with Table~\ref{tab:overall}.
+
+\subsection{Learning Behaviour}
+Fig.~\ref{fig:learning} reports validation reward separately for every learner
+seed of the proposed method and three principal training baselines.
+Fig.~\ref{fig:learning_mean} provides a single comparison of all five learned
+techniques by mapping each early-stopped run to normalized training progress
+and then averaging all five seeds. Hybrid MADDPG and \method\
+generally reach stronger validation rewards than the Reptile variants. The
+Reptile curves also exhibit larger seed-to-seed differences. These results
+support evaluating a fixed domain-randomized policy and do not constitute
+evidence of few-shot adaptation.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.95\textwidth]{learning_curves_learned_methods.png}
+\caption{Validation learning curves for the proposed method, nominal Hybrid
+MADDPG, Reptile-MADDPG, and Hybrid MAPPO. Each line denotes an independent
+learner seed; a short centered moving average is used only to improve
+visibility of the per-seed trend.}
+\label{fig:learning}
+\end{figure*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.88\textwidth]{validation_reward_mean_all_methods.png}
+\caption{Mean validation reward per slot for all learned techniques. Each run
+is mapped to normalized training progress because early stopping produces
+different epoch counts. Solid lines average all five independent learner
+seeds, and shaded regions are 95\% Student-$t$ confidence intervals.}
+\label{fig:learning_mean}
+\end{figure*}
+
+\subsection{Overall Service and Energy Performance}
+Table~\ref{tab:overall} and Fig.~\ref{fig:overall} summarize test performance.
+\method\ achieves the best learned completion rate (81.96\%), throughput
+(0.914 tasks/s), and cumulative reward ($-48.3\times10^3$). Hybrid MAPPO has
+the highest numerical deadline-success rate (42.41\%), narrowly above
+\method\ at 41.50\%. Reptile-MADDPG consumes the least energy, but its
+completion is only 59.07\% and it leaves $5.58\times10^{11}$ cycles of final
+backlog. The energy reduction therefore accompanies reduced service rather
+than an unqualified efficiency improvement.
+
+\begin{table*}[!t]
+\caption{Learner-Seed Mean Performance Across Held-Out Stress Conditions}
+\label{tab:overall}
+\centering
+\footnotesize
+\begin{tabular}{lrrrrrr}
+\toprule
+Method & Deadline (\%) & Completion (\%) & Throughput & Reward & Backlog (Gcycle) & Energy (kJ)\\
+\midrule
+Hybrid MADDPG & 22.16 & 77.93 & 0.847 & $-52{,}076$ & 206.9 & 18.15\\
+\textbf{\method} & 41.50 & \textbf{81.96} & \textbf{0.914} & \textbf{$-48{,}292$} & 250.1 & 19.06\\
+Reptile-MADDPG & 32.17 & 59.07 & 0.600 & $-271{,}616$ & 557.9 & \textbf{8.70}\\
+Reptile no queue & 15.95 & 48.71 & 0.451 & $-333{,}804$ & 728.2 & 39.74\\
+Hybrid MAPPO & \textbf{42.41} & 76.75 & 0.827 & $-125{,}162$ & 278.3 & 13.61\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.92\textwidth]{overall_learned_methods.png}
+\caption{Overall performance of learned controllers. The energy panel must be
+read together with completion and backlog because a policy may save energy by
+keeping UAVs unavailable. Error bars are 95\% Student-$t$ intervals over five
+independent learner seeds.}
+\label{fig:overall}
+\end{figure*}
+
+\subsection{Robustness Across Stress Conditions}
+Per-condition results show that under light load, harvesting changes, and
+backhaul degradation, \method\ completes about
+99.8\% of tasks. MAPPO also performs strongly in these regimes. All learned
+methods deteriorate near capacity and overload. Under overload, completion is
+approximately 46.6\% for Hybrid MADDPG, 37.7\% for \method, 29.7\% for MAPPO,
+and 19.9\% for Reptile-MADDPG. Thus domain randomization improves broad
+generalization but does not create service capacity beyond the modeled
+network.
+
+The aggregate mean obscures differences between operating regimes. Under
+overload, nominal Hybrid MADDPG completes more tasks than \method, whereas
+averaging across the declared stress family reverses this ordering. The
+benefit observed for domain randomization thus concerns the cross-condition
+average and does not imply a gain in every individual case.
+
+\subsection{Sensitivity to Offered Load}
+Fig.~\ref{fig:load_sensitivity} isolates the three completed experiments in
+which the nominal offered-load ratio increases from 0.35 to 0.85 and 1.25,
+while the topology, processor capacities, nominal harvesting, and backhaul
+remain fixed. The proposed method keeps the lowest numerical p95 response
+time at low load and the strongest reward per slot at overload, whereas
+nominal Hybrid MADDPG retains less final backlog at the two higher load
+levels. Both methods deteriorate sharply once offered work approaches or
+exceeds the available service capacity.
+
+Response-time percentiles are conditioned on completed tasks. They must be
+read together with final backlog: under overload, a controller may show a
+smaller response-time percentile because its longest tasks remain unfinished
+and are therefore censored from the completed-task latency sample. Reward per
+slot is cumulative reward divided by the common 300-slot evaluation length
+(200 offered-load slots followed by 100 drain slots). One learner seed for
+each Reptile variant completed no tasks at these load levels, so its p95
+response time is undefined and is not imputed; that seed remains included in
+the backlog and reward panels.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.98\textwidth]{offered_load_sensitivity.png}
+\caption{Sensitivity to offered-load ratio for the five learned controllers.
+Lines show learner-seed means and shaded regions show 95\% Student-$t$
+confidence intervals. Backlog and reward use all five independently trained
+seeds. The p95 response time uses completed tasks and four available seeds for
+the two Reptile variants because their fifth seed completed no tasks; all
+other latency series use five seeds. Final backlog retains unfinished work.}
+\label{fig:load_sensitivity}
+\end{figure*}
+
+\subsection{Domain-Randomization Ablation}
+To isolate the training distribution, Hybrid MADDPG and \method\ use the same
+hybrid actor--critic family and feasibility layer; the former is trained on
+the nominal domain, whereas the latter samples all declared training
+domains. Table~\ref{tab:dr_ablation} shows that randomization raises numerical
+deadline success by 19.34 percentage points, completion by 4.03 points,
+throughput by 0.067 tasks/s, and reward by 3,784. It uses 0.91 kJ more energy
+and leaves 43.2 Gcycles more final backlog. Five-seed paired confidence
+intervals cross zero for these differences, so they are reported as numerical
+improvements rather than statistically established superiority.
+
+\begin{table}[!t]
+\caption{Domain-Randomization Ablation}
+\label{tab:dr_ablation}
+\centering
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrp{0.34\columnwidth}}
+\toprule
+Metric & Hybrid & \method & Paired $\Delta$ [95\% CI]\\
+\midrule
+Deadline success & 0.222 & 0.415 & $+0.193$ [$-0.072,0.459$]\\
+Completion & 0.779 & 0.820 & $+0.040$ [$-0.028,0.109$]\\
+Throughput (task/s) & 0.847 & 0.914 & $+0.067$ [$-0.095,0.230$]\\
+Reward & $-52{,}076$ & $-48{,}292$ & $+3{,}784$ [$-15{,}924,23{,}492$]\\
+Backlog (Gcycle) & 206.9 & 250.1 & $+43.2$ [$-25.2,111.6$]\\
+Energy (kJ) & 18.15 & 19.06 & $+0.91$ [$-35.07,36.89$]\\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{domain_randomization_ablation.png}
+\caption{Nominal Hybrid MADDPG versus the domain-randomized proposed method.
+Error bars are 95\% Student-$t$ intervals over five learner seeds; paired
+difference intervals are reported in Table~\ref{tab:dr_ablation}.}
+\label{fig:dr_ablation}
+\end{figure}
+
+\subsection{Direct Physical-Queue-Weight Ablation}
+To isolate the contribution of queue awareness, the proposed
+domain-randomized MADDPG backbone is trained twice under paired learner seeds:
+once with the physical-queue terms in the Lyapunov reward and once with those
+terms removed. All remaining architecture, domain sampling, training, safety,
+and evaluation settings are unchanged. Table~\ref{tab:queue_ablation} shows
+that queue weighting raises average deadline success by 16.17 percentage
+points, completion by 31.42 points, throughput by 0.470 tasks/s, and reward by
+241,982, while reducing final backlog by 467.0 Gcycles. Throughput, backlog,
+and reward have paired 95\% confidence intervals that exclude zero. The
+deadline and completion directions are positive, but their intervals cross
+zero because only five independent learner seeds are available. System energy
+changes by only 0.66 kJ and its interval also crosses zero, so the service
+improvement is not claimed as an established energy reduction.
+
+\begin{table}[!t]
+\caption{Direct Physical-Queue-Weight Ablation of Domain-Randomized MADDPG}
+\label{tab:queue_ablation}
+\centering
+\footnotesize
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrp{0.31\columnwidth}}
+\toprule
+Metric & No queue & Queue-aware & Paired $\Delta$ [95\% CI]\\
+\midrule
+Deadline success & 0.180 & 0.342 & $+0.162$ [$-0.050,0.373$]\\
+Completion & 0.515 & 0.829 & $+0.314$ [$-0.033,0.661$]\\
+Throughput (task/s) & 0.428 & 0.898 & $+0.470$ [$0.053,0.887$]\\
+Reward & $-294{,}956$ & $-52{,}974$ & $+241{,}982$ [$70{,}906,413{,}059$]\\
+Backlog (Gcycle) & 668.2 & 201.2 & $-467.0$ [$-829.6,-104.4$]\\
+Energy (kJ) & 10.32 & 10.97 & $+0.66$ [$-2.92,4.23$]\\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{queue_weight_ablation.png}
+\caption{Direct queue-weight ablation on the domain-randomized MADDPG
+backbone. Error bars are 95\% Student-$t$ intervals over five independently
+trained learner seeds; paired-difference intervals are reported in
+Table~\ref{tab:queue_ablation}.}
+\label{fig:queue_ablation}
+\end{figure}
+
+\subsection{Safety and Decision Latency}
+Across the frozen test runs, every learned method records zero modeled battery
+violations, separation violations, and physical-feasibility failures.
+However, mean repair rates are 100\% for Hybrid MADDPG and \method, 98.5\%
+for Reptile-MADDPG, 94.4\% for its no-queue variant, and 95.1\% for MAPPO.
+Thus modeled safety is a property of the actor plus feasibility controller,
+not of the raw neural proposal alone. Mean decision latencies are 3.84 ms for
+Hybrid MADDPG, 3.63 ms for \method, 2.75 ms for Reptile-MADDPG, 6.44 ms for
+its no-queue version, and 4.47 ms for MAPPO. Corresponding mean
+95th-percentile latencies are 5.26, 5.29, 3.35, 9.16, and 8.49 ms.
+
+\subsection{Topology and Capacity Scalability Scope}
+The offered-load sensitivity above retains three vehicles,
+two RSUs, two UAVs, static synthetic positions, and fixed uplink capacities.
+It therefore does not support a claim that performance scales to larger fleets
+or remains invariant to altitude, coverage, or channel changes. A complete
+scalability study should vary vehicle and UAV counts, offered load, backhaul
+capacity, and harvesting rate while retraining or using a topology-compatible
+masked encoder. These experiments are not filled with approximated values in
+this report.
+
+\subsection{Interpretation and Limitations}
+Three findings guide the interpretation of these experiments. Broader
+training-domain exposure improves the observed service averages of hybrid
+MADDPG. Energy consumption alone is insufficient to judge performance,
+because a controller can reduce expenditure by leaving UAVs unavailable and
+tasks unfinished. Finally, the frequent action repairs show that the
+feasibility layer remains necessary for the measured safety of execution.
+
+The study has five main limitations. It uses static synthetic positions and
+synthetic task/harvest traces; the reported benchmark uses fixed uplink
+capacities rather than the geometry-aware channel instantiation; five learner
+seeds give wide intervals; the focused ablation uses separately retrained
+checkpoints rather than the checkpoints in the full benchmark; and zero online
+updates were used during evaluation. The last point is consistent with the
+domain-randomized fixed policy proposed here but means that the present
+evidence must not be described as few-shot adaptation.
+
+\section{Conclusion}
+This paper developed \method, a queue-aware domain-randomized hybrid MADDPG
+controller for a multi-UAV vehicular edge-cloud network. The formulation
+integrates persistent task stages, radio and computing capacity, UAV flight
+and hovering energy, harvesting, battery causality, landing reserve, and
+collision avoidance. Domain randomization trains one fixed CTDE policy across
+seven operating conditions, while a Lyapunov reward connects physical and
+virtual queues to service and energy decisions.
+
+Across five learner seeds and held-out paired scenarios, domain-randomized
+MADDPG improves numerical deadline success, completion, throughput, and reward
+over nominal Hybrid MADDPG. It also outperforms the current Reptile variant on
+completion and reward, although Hybrid MAPPO achieves a slightly higher
+deadline-success rate. The direct ablation further shows that physical-queue
+weighting yields statistically established improvements in throughput,
+backlog, and reward under the five-seed protocol. All learned methods remain physically feasible under
+the shared safety layer, although the high repair rates show that raw actor
+outputs are not independently safe. Future work should increase the
+learner-seed count, activate recorded mobility and geometry-aware radio
+service, evaluate topology and parameter sensitivity, and tune service
+constraints to prevent energy-saving policies from landing UAVs excessively.
+
+\IEEEtriggeratref{10}
+\begin{thebibliography}{99}
+\bibitem{zhang2019mobile}
+S.~Zhang, H.~Zhang, B.~Di, and L.~Song, ``Cellular UAV-to-X communications:
+Design and optimization for multi-UAV networks,'' \emph{IEEE Trans. Wireless
+Commun.}, vol.~18, no.~2, pp.~1346--1359, 2019.
+
+\bibitem{liu2020uav}
+Y.~Liu, K.~Xiong, Q.~Ni, P.~Fan, and K.~B. Letaief, ``UAV-assisted wireless
+powered cooperative mobile edge computing: Joint offloading, CPU control, and
+trajectory optimization,'' \emph{IEEE Internet Things J.}, vol.~7, no.~4,
+pp.~2777--2790, 2020.
+
+\bibitem{neely2010stochastic}
+M.~J. Neely, \emph{Stochastic Network Optimization with Application to
+Communication and Queueing Systems}. Morgan \& Claypool, 2010.
+
+\bibitem{mao2017dynamic}
+Y.~Mao, J.~Zhang, and K.~B. Letaief, ``Dynamic computation offloading for
+mobile-edge computing with energy harvesting devices,'' \emph{IEEE J. Sel.
+Areas Commun.}, vol.~34, no.~12, pp.~3590--3605, 2016.
+
+\bibitem{sun2026qtop}
+H.~Sun, H.~Chen, H.~Xue, L.~Wu, Z.~Li, N.~Chen, W.~Liu, and J.~Yu,
+``Q-TOP: Queue-aware task offloading and path planning for multi-UAV assisted
+vehicular edge computing networks,'' \emph{IEEE Trans. Veh. Technol.},
+accepted manuscript, 2026, doi: 10.1109/TVT.2026.3721145.
+
+\bibitem{lowe2017multi}
+R.~Lowe \emph{et al.}, ``Multi-agent actor-critic for mixed cooperative-
+competitive environments,'' in \emph{Advances in Neural Information
+Processing Systems}, 2017.
+
+\bibitem{schulman2017proximal}
+J.~Schulman \emph{et al.}, ``Proximal policy optimization algorithms,''
+arXiv:1707.06347, 2017.
+
+\bibitem{talukdar2026mappo}
+N.~Talukdar, T.~Barai, A.~Hazra, and N.~Mazumdar, ``MAPPO-driven task quality optimization with
+wireless energy transfer in multi-UAV MEC-enabled IoT networks,'' \emph{IEEE
+Trans. Sustainable Computing}, vol.~11, no.~3, pp.~302--315, 2026,
+doi: 10.1109/TSUSC.2026.3688744.
+
+\bibitem{finn2017model}
+C.~Finn, P.~Abbeel, and S.~Levine, ``Model-agnostic meta-learning for fast
+adaptation of deep networks,'' in \emph{Proc. ICML}, 2017.
+
+\bibitem{nichol2018reptile}
+A.~Nichol, J.~Achiam, and J.~Schulman, ``On first-order meta-learning
+algorithms,'' arXiv:1803.02999, 2018.
+
+\bibitem{yan2026rmaddpg}
+M.~Yan, P.~Yu, J.~Chen, C.~Li, and C.-L.~I, ``Dynamic computation offloading
+optimization based on meta-reinforcement learning in UAV-assisted MEC
+networks,'' \emph{IEEE Internet Things J.}, vol.~13, no.~11,
+pp.~23615--23627, 2026, doi: 10.1109/JIOT.2026.3670318.
+
+\bibitem{xiong2021energy}
+Z.~Xiong \emph{et al.}, ``UAV-assisted wireless energy and data transfer with
+deep reinforcement learning,'' \emph{IEEE Trans. Cogn. Commun. Netw.},
+vol.~7, no.~1, pp.~85--99, 2021.
+
+\bibitem{guo2024multi}
+H.~Guo, Y.~Wang, J.~Liu, and C.~Liu, ``Multi-UAV cooperative task offloading
+and resource allocation in 5G advanced and beyond,'' \emph{IEEE Trans.
+Wireless Commun.}, vol.~23, no.~1, pp.~347--359, 2024.
+
+\bibitem{liang2025rav}
+H.~Liang \emph{et al.}, ``Joint task partitioning and resource allocation in
+RAV-enabled vehicular edge computing based on deep reinforcement learning,''
+\emph{IEEE Internet Things J.}, vol.~12, no.~11, pp.~15453--15466, 2025.
+
+\bibitem{tang2025dnn}
+X.~Tang \emph{et al.}, ``DNN task assignment in UAV networks: A generative
+AI enhanced multiagent reinforcement learning approach,'' \emph{IEEE Internet
+Things J.}, vol.~12, no.~10, pp.~13340--13352, 2025.
+
+\bibitem{tobin2017domain}
+J.~Tobin \emph{et al.}, ``Domain randomization for transferring deep neural
+networks from simulation to the real world,'' in \emph{Proc. IEEE/RSJ Int.
+Conf. Intell. Robots Syst.}, 2017, pp.~23--30.
+
+\bibitem{peng2018sim}
+X.~B. Peng, M.~Andrychowicz, W.~Zaremba, and P.~Abbeel, ``Sim-to-real
+transfer of robotic control with dynamics randomization,'' in \emph{Proc.
+IEEE Int. Conf. Robot. Autom.}, 2018, pp.~3803--3810.
+
+\bibitem{zhang2019predictive}
+Q.~Zhang, M.~Mozaffari, W.~Saad, M.~Bennis, and M.~Debbah, ``Machine learning
+for predictive on-demand deployment of UAVs for wireless communications,''
+arXiv:1805.00061, 2018.
+\end{thebibliography}
+
+\end{document}
